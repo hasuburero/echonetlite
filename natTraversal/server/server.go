@@ -4,6 +4,10 @@ import (
 	"net"
 )
 
+const (
+	maxsize = 1024
+)
+
 type ServerInstance struct {
 	ip   string
 	port string
@@ -15,11 +19,20 @@ func InitInstance(ip string, port string) ServerInstance {
 }
 
 func echonetHandler(conn *net.TCPConn) {
+	defer conn.Close()
+	buf := make([]byte, maxsize)
+	n, err := conn.Read(buf)
+	if err != nil {
+		return
+	}
+	fmt.Println(string(buf[:n]))
 
-	// defer conn.Close()
-	buf := make()
-	// conn, err := listener
+	_, err = conn.Write([]byte("Hello world!!\n"))
+	if err != nil {
+		return
+	}
 }
+
 func receiveTCPConnection(listener *net.TCPListener) {
 	for {
 		conn, err := listener.AcceptTCP()
