@@ -14,17 +14,23 @@ func InitInstance(ip string, port string) ServerInstance {
 	return servinst
 }
 
-func receiveTCPConnection(listener *net.TCPListener){
-  for{
-    conn, err := listener.AcceptTCP()
-    if err != nil{
-      fmt.Println(err)
-      continue
-    }
-    go func(conn *net.TCPConn){
-      
-    }
-  }
+func echonetHandler(conn *net.TCPConn) {
+
+	// defer conn.Close()
+	buf := make()
+	// conn, err := listener
+}
+func receiveTCPConnection(listener *net.TCPListener) {
+	for {
+		conn, err := listener.AcceptTCP()
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		go func(conn *net.TCPConn) {
+			echonetHandler(conn)
+		}(conn)
+	}
 }
 
 func (self *ServerInstance) InitServer() error {
