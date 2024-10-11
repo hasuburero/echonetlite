@@ -6,5 +6,5 @@
 
 ### natTraversal
 
-NATを介して通信するためにclientからserverに対してtcpコネクションを作成
+NATを介して通信するためにclientからserverに対してtcpコネクションを作成  
 コネクションを通してechonet lite frameを伝送
