@@ -6,7 +6,8 @@ import (
 )
 
 const (
-  host = "localhost:8080"
+  host = "localhost:8080" // 
+  gw_id = "1" // echonetliteとは関係ない実用上の識別id
 )
 
 func main(){
