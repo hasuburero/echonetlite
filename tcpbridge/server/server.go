@@ -21,15 +21,25 @@ func InitInstance(ip string, port string) ServerInstance {
 func echonetHandler(conn *net.TCPConn) {
 	defer conn.Close()
 	buf := make([]byte, maxsize)
+
+	// first greeting per each connection
 	n, err := conn.Read(buf)
 	if err != nil {
 		return
 	}
-	fmt.Println(string(buf[:n]))
+	gw_id := string(buf[:n])
+	fmt.Println(gw_id)
 
-	_, err = conn.Write([]byte("Hello world!!\n"))
-	if err != nil {
-		return
+	// echonetlite bridge default routine
+	for {
+		_, err = conn.Write([]byte("Hello world!!\n"))
+		if err != nil {
+			return
+		}
+		n, err := conn.Read(buf)
+		if err != nil {
+			return
+		}
 	}
 }
 
@@ -59,5 +69,4 @@ func (self *ServerInstance) InitServer() error {
 	go func() {
 		receiveTCPConnection(listener)
 	}()
-
 }
