@@ -6,11 +6,13 @@
 
 ### tcpbridge
 
+sample program  
 NATを介して通信するためにclientからserverに対してtcpコネクションを作成  
 コネクションを通してechonet lite frameを伝送
 
 ### httpbridge
 
+sample program  
 NATを介して通信するためにclientからmec-rmに対してhttp通信  
 clientからの最初の通信はmec-rmに対してリクエスト(便宜上gw_idのみ)を送信  
 mec-rmからのレスポンスでデータ要求・制御指示を送信  
