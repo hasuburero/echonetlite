@@ -1,8 +1,10 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -17,8 +19,18 @@ type Get_echonet_request struct {
 }
 
 type Get_echonet_response struct {
-	format string
+	format string `json:"format"`
 }
+
+type Echonet_bridge_server struct{
+	channel chan Get_echonet_request
+}
+
+type Bridge_interface struct{
+
+}
+
+var bridge_server Echonet_bridge_server
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	length := r.ContentLength
@@ -26,19 +38,32 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var ctx Get_echonet_request
 	err := json.Unmarshal(reqBody, &ctx)
 	if err != nil {
+		fmt.Println("json.Unmarshal error")
 		return
 	}
 	fmt.Println(ctx)
 
-	var format Get_echonet_response{format:"1234657890"}
+	format := Get_echonet_response{format: "1234657890"}
+	json_buf, err := json.Marshal(format)
+	if err != nil {
+		fmt.Println("json.Marshal error")
+		return
+	}
+	body := bytes.NewBuffer(json_buf)
+	_, err = io.Copy(w, body)
+	if err != nil {
+		fmt.Println("io.Copy error")
+		return
+	}
 }
 
-func main() {
-	wait := make(chan bool)
+func Init(addr, port string) {
+	bridge_server = make(chan )
 	server := http.Server{
 		Addr: addr + ":" + port,
 	}
 
-	http.HandleFunc("/", Handler)
-	<-wait
+	http.HandleFunc("/echonet", Handler)
+
+	go server.ListenAndServe()
 }
