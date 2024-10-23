@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"echonetlite/echonetlite/frame"
 	"io"
 	"net/http"
 )
@@ -22,13 +23,17 @@ type Get_echonet_response struct {
 	format string `json:"format"`
 }
 
-type Echonet_bridge_server struct{
+type Echonet_instance struct {
 	channel chan Get_echonet_request
+	echonetlite frame.Echonetlite
 }
 
-type Bridge_interface struct{
-
+type Bridge_interface struct {
+	gw_id string
+	channel chan 
 }
+
+var bridge_chan chan chan Bridge_interface
 
 var bridge_server Echonet_bridge_server
 
@@ -58,7 +63,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Init(addr, port string) {
-	bridge_server = make(chan )
+	bridge_chan = make(chan chan Bridge_interface)
 	server := http.Server{
 		Addr: addr + ":" + port,
 	}
