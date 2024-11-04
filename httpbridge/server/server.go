@@ -14,17 +14,31 @@ const (
 	port = "8080"
 )
 
-type Get_echonet_request struct {
+// data structure witch through the api channel
+type Contract_channel struct{
+	get_contract_request Get_contract_request
+	return_channel chan string
+}
+
+type Data_channel struct{
+	post_data_request Post_data_request
+}
+
+// http request body structure
+type Post_data_request struct{
+	gw_id string `json:"gw_id"`
+	format string `json:"format"`
+}
+
+type Get_contract_request struct {
 	gw_id  string `json:"gw_id"`
-	format string `json:"format"`
 }
 
-type Get_echonet_response struct {
-	format string `json:"format"`
-}
-
-type Echonet_instance struct {
-	channel chan Get_echonet_request
+// server instance structure
+// including contract channel, data channel, 
+type Echonet_bridge struct {
+	contract_channel chan Contract_channel
+	data_channel chan chan 
 	echonetlite frame.Echonetlite
 }
 
@@ -33,11 +47,11 @@ type Bridge_interface struct {
 	channel chan 
 }
 
-var bridge_chan chan chan Bridge_interface
+func ReadRecv(){
 
-var bridge_server Echonet_bridge_server
+}
 
-func Handler(w http.ResponseWriter, r *http.Request) {
+func (self *Echonet_instance)Contract(w http.ResponseWriter, r *http.Request) {
 	length := r.ContentLength
 	reqBody := make([]byte, length)
 	var ctx Get_echonet_request
@@ -62,13 +76,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Init(addr, port string) {
+func (self *Echonet_instance)Data(w http.ResponseWriter, r *http.Request){
+
+}
+
+func Init(addr, port, contract, data string) {
 	bridge_chan = make(chan chan Bridge_interface)
 	server := http.Server{
 		Addr: addr + ":" + port,
 	}
 
-	http.HandleFunc("/echonet", Handler)
+	http.HandleFunc(contract, Echonet_bridge.Contract)
+	http.HandleFunc(data, Echonet_bridge.Data)
 
 	go server.ListenAndServe()
 }
