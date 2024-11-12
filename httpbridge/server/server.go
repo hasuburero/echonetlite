@@ -47,20 +47,19 @@ type Bridge_interface struct {
 	channel chan 
 }
 
-func ReadRecv(){
-
+func (self *Echonet_instance)ReadRecv(){
 }
 
 func (self *Echonet_instance)Contract(w http.ResponseWriter, r *http.Request) {
 	length := r.ContentLength
 	reqBody := make([]byte, length)
-	var ctx Get_echonet_request
+	var ctx Get_contract_request
 	err := json.Unmarshal(reqBody, &ctx)
 	if err != nil {
 		fmt.Println("json.Unmarshal error")
 		return
 	}
-	fmt.Println(ctx)
+	self.read_recv_channel <- 
 
 	format := Get_echonet_response{format: "1234657890"}
 	json_buf, err := json.Marshal(format)
