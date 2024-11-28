@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"echonetlite/echonetlite/frame"
+	"github.com/hasuburero/echonetlite/echonetlite"
 	"io"
 	"net/http"
 )
@@ -39,7 +39,7 @@ type Get_contract_request struct {
 type Echonet_bridge struct {
 	contract_channel chan Contract_channel
 	data_channel chan chan 
-	echonetlite frame.Echonetlite
+	echonetlite echonetlite.Echonetlite
 }
 
 type Bridge_interface struct {
