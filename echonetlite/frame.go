@@ -5,9 +5,9 @@ import (
 )
 
 type Echonetlite struct {
-	component  Component
-	frame      []byte
-	frame_size int
+	Component  Component
+	Frame      []byte
+	Frame_size int
 }
 
 type Component struct {
