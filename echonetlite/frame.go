@@ -1,4 +1,4 @@
-package frame
+package echonetlite
 
 import (
 	"errors"
