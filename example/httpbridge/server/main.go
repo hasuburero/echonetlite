@@ -7,4 +7,5 @@ import (
 
 func main() {
 	wait := make(chan bool)
+	server.Init()
 }
