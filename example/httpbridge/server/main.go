@@ -7,6 +7,7 @@ import (
 
 func main() {
 	wait := make(chan bool)
-	server.Init()
+	Bridge_instance := server.Init()
+	Bridge_instance.
 	<-wait
 }
