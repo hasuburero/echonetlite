@@ -5,7 +5,7 @@ import (
 )
 
 type Echonetlite struct {
-	Component  Component
+	Compo      Component
 	Frame      []byte
 	Frame_size int
 }
@@ -30,29 +30,29 @@ type Datactx struct {
 }
 
 func (self *Echonetlite) MakeFrame() error {
-	if int(self.component.opc) != len(self.component.datactx) {
+	if int(self.Compo.opc) != len(self.Compo.datactx) {
 		return errors.New("opc not matches for datactx length")
 	}
 	var frame []byte
-	frame = append(frame, self.component.ehd1)
-	frame = append(frame, self.component.ehd2)
-	frame = append(frame, self.component.tid[:]...)
-	frame = append(frame, self.component.seoj[:]...)
-	frame = append(frame, self.component.deoj[:]...)
-	frame = append(frame, self.component.esv)
-	frame = append(frame, self.component.opc)
-	for i := 0; i < int(self.component.opc); i++ {
-		if int(self.component.datactx[i].pdc) != len(self.component.datactx) {
+	frame = append(frame, self.Compo.ehd1)
+	frame = append(frame, self.Compo.ehd2)
+	frame = append(frame, self.Compo.tid[:]...)
+	frame = append(frame, self.Compo.seoj[:]...)
+	frame = append(frame, self.Compo.deoj[:]...)
+	frame = append(frame, self.Compo.esv)
+	frame = append(frame, self.Compo.opc)
+	for i := 0; i < int(self.Compo.opc); i++ {
+		if int(self.Compo.datactx[i].pdc) != len(self.Compo.datactx) {
 			return errors.New("pdc don't match for edt length")
 		}
-		frame = append(frame, self.component.datactx[i].epc)
-		frame = append(frame, self.component.datactx[i].pdc)
-		frame = append(frame, self.component.datactx[i].edt...)
+		frame = append(frame, self.Compo.datactx[i].epc)
+		frame = append(frame, self.Compo.datactx[i].pdc)
+		frame = append(frame, self.Compo.datactx[i].edt...)
 	}
 	return nil
 }
 
 func MakeInstance(destIP, destPort string, ehd1, ehd2 byte, tid [2]byte, seoj, deoj [3]byte) Echonetlite {
 	component := Component{destIP: destIP, destPort: destPort, ehd1: ehd1, ehd2: ehd2, tid: tid, seoj: seoj, deoj: deoj}
-	return Echonetlite{component: component}
+	return Echonetlite{Compo: component}
 }
