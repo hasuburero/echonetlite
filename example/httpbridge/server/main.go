@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"httpbridge/server"
+	"github.com/hasuburero/echonetlite/httpbridge/server"
 )
 
 func main() {
 	wait := make(chan bool)
 	server.Init()
+	<-wait
 }

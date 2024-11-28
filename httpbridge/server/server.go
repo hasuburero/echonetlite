@@ -36,6 +36,10 @@ type Post_data_request struct {
 	format string `json:"format"`
 }
 
+type Get_contract_response struct {
+	format string `json:"format"`
+}
+
 /////////////////////////////////////
 
 type Echonet_instance struct {
@@ -57,7 +61,7 @@ func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
 	self.read_recv_contract <- recv_context
 	echonetlite := <-recv_context.return_channel
 
-	format := Get_contract_response{format: string(echonetlite.frame[:echonetlite.frame_size])}
+	format := Get_contract_response{format: string(echonetlite.Frame[:echonetlite.Frame_size])}
 	json_buf, err := json.Marshal(format)
 	if err != nil {
 		fmt.Println(err)
