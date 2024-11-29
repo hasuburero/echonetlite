@@ -6,4 +6,4 @@
 ├── server/  
 │ ├── server.go  
 │ └── README.md  
-└── client
+└── client/
