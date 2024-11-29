@@ -9,42 +9,37 @@ import (
 	"net/http"
 )
 
-const (
-	addr = ""
-	port = "8080"
-)
-
 // data structure witch through the api channel
 type Contract_context struct {
-	get_contract_request Get_contract_request
-	return_channel       chan echonetlite.Echonetlite
+	Get_contract_request Get_contract_request
+	Return_channel       chan echonetlite.Echonetlite
 }
 
 type Data_context struct {
-	post_data_request Post_data_request
+	Post_data_request Post_data_request
 }
 
 //////////////////////////////////////////////
 
 // http request body structure
 type Get_contract_request struct {
-	gw_id string `json:"gw_id"`
+	Gw_id string `json:"gw_id"`
 }
 
 type Post_data_request struct {
-	gw_id  string `json:"gw_id"`
-	format string `json:"format"`
+	Gw_id  string `json:"gw_id"`
+	Format string `json:"format"`
 }
 
 type Get_contract_response struct {
-	format string `json:"format"`
+	Format string `json:"format"`
 }
 
 /////////////////////////////////////
 
 type Echonet_instance struct {
-	read_recv_contract chan Contract_context
-	read_recv_data     chan Data_context
+	Read_recv_contract chan Contract_context
+	Read_recv_data     chan Data_context
 }
 
 func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
@@ -58,10 +53,10 @@ func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var recv_context Contract_context = Contract_context{ctx, make(chan echonetlite.Echonetlite)}
-	self.read_recv_contract <- recv_context
-	echonetlite := <-recv_context.return_channel
+	self.Read_recv_contract <- recv_context
+	echonetlite := <-recv_context.Return_channel
 
-	format := Get_contract_response{format: string(echonetlite.Frame[:echonetlite.Frame_size])}
+	format := Get_contract_response{Format: string(echonetlite.Frame[:echonetlite.Frame_size])}
 	json_buf, err := json.Marshal(format)
 	if err != nil {
 		fmt.Println(err)
@@ -87,7 +82,7 @@ func (self *Echonet_instance) Data(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var recv_context Data_context = Data_context{ctx}
-	self.read_recv_data <- recv_context
+	self.Read_recv_data <- recv_context
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte("ok"))
