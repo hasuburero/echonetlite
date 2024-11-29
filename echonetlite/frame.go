@@ -4,6 +4,19 @@ import (
 	"errors"
 )
 
+type ClassDefinition struct {
+}
+
+var (
+	Class_SmartMeter = [3]byte{0x02, 0x88, 0x01}
+	Class_Battery    = [3]byte{0x02, 0x7d, 0x01}
+)
+
+const (
+	EHD1 = byte(0x10)
+	EHD2 = byte(0x81)
+)
+
 const (
 	// request
 	ESV_SetI    = byte(0x60) // write + no resopnse
@@ -24,8 +37,6 @@ const (
 type Echonetlite struct {
 	Frame      []byte
 	Frame_size int
-	destIP     string
-	destPort   string
 	ehd1       byte      // Echonet lite frame header1
 	ehd2       byte      // Echonet lite frame header2
 	tid        [2]byte   // transaction id
@@ -65,7 +76,7 @@ func (self *Echonetlite) MakeFrame() error {
 	return nil
 }
 
-func MakeInstance(destIP, destPort string, ehd1, ehd2 byte, tid [2]byte, seoj, deoj [3]byte) Echonetlite {
-	echonetlite := Echonetlite{destIP: destIP, destPort: destPort, ehd1: ehd1, ehd2: ehd2, tid: tid, seoj: seoj, deoj: deoj}
+func MakeInstance(ehd1, ehd2 byte, tid [2]byte, seoj, deoj [3]byte) Echonetlite {
+	echonetlite := Echonetlite{ehd1: ehd1, ehd2: ehd2, tid: tid, seoj: seoj, deoj: deoj}
 	return echonetlite
 }
