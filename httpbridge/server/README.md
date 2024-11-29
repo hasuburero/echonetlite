@@ -29,7 +29,10 @@ type Post_data_request struct{
 
 ```
 Init(addr, port, contract_path, data_path string) Echonet_instance
-<- Echonet_instance.re
+loop{
+    <- Echonet_instance.read_recv_contract
+    <- Echonet_instance.read_recv_data
+}
 ```
 
 ```
