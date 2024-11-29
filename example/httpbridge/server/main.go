@@ -13,6 +13,8 @@ const (
 
 var (
 	Class_VGW = [3]byte{0x10, 0xff, 0x01}
+	EHD1      = echonetlite.EHD1
+	EHD2      = echonetlite.EHD2
 )
 
 const (
@@ -53,8 +55,9 @@ func main() {
 	for {
 		select {
 		case contract_data := <-Bridge_instance.Read_recv_contract:
-			fmt.Println(contract_data.Get_contract_request.Gw_id)
-			echonetlite.MakeInstance()
+			gw_id := contract_data.Get_contract_request.Gw_id
+			fmt.Println(gw_id)
+			echonetlite.MakeInstance(EHD1, EHD2, GW[gw_id].Tid++, Class_VGW, echonetlite.Class_SmartMeter)
 			contract_data.Return_channel
 		case data_data := <-Bridge_instance.Read_recv_data:
 		}
