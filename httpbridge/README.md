@@ -3,7 +3,7 @@
 ### Including
 
 .
-├── server/
-│ ├── server.go
-│ └── README.md
+├── server/  
+│ ├── server.go  
+│ └── README.md  
 └── client
