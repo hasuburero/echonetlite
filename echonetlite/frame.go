@@ -88,7 +88,7 @@ func (self *Echonetlite) MakeFrame() error {
 	return nil
 }
 
-func MakeInstance(ehd1, ehd2 byte, tid [2]byte, seoj, deoj [3]byte, esv byte) Echonetlite {
-	echonetlite := Echonetlite{EHD1: ehd1, EHD2: ehd2, Tid: tid, SEOJ: seoj, DEOJ: deoj, ESV: esv}
+func MakeInstance(ehd1, ehd2 byte, tid [2]byte, seoj, deoj [3]byte, esv byte, opc byte, datactx []Datactx) Echonetlite {
+	echonetlite := Echonetlite{EHD1: ehd1, EHD2: ehd2, Tid: tid, SEOJ: seoj, DEOJ: deoj, ESV: esv, OPC: opc, Datactx: datactx}
 	return echonetlite
 }
