@@ -63,6 +63,33 @@ func Tidinc(tid [2]byte) [2]byte {
 	return tid
 }
 
+func (self *Echonetlite) ReverseFrame() error {
+	if len(self.Frame) == 0 {
+		return errors.New("0 length frame")
+	}
+	self.Frame_size = len(self.Frame)
+	self.EHD1 = self.Frame[0]
+	self.EHD2 = self.Frame[1]
+	self.Tid = [2]byte{self.Frame[2], self.Frame[3]}
+	self.SEOJ = [3]byte{self.Frame[4], self.Frame[5], self.Frame[6]}
+	self.DEOJ = [3]byte{self.Frame[7], self.Frame[8], self.Frame[9]}
+	self.ESV = self.Frame[10]
+	self.OPC = self.Frame[11]
+	if self.OPC == 0 {
+		return nil
+	}
+
+	for i := 12; i < self.Frame_size; {
+		var datactx Datactx = Datactx{EPC: self.Frame[i], PDC: self.Frame[i+1]}
+		for j := range int(datactx.PDC) {
+			datactx.EDT = append(datactx.EDT, self.Frame[i+2+j])
+		}
+		i += 2 + int(datactx.PDC)
+		self.Datactx = append(self.Datactx, datactx)
+	}
+	return nil
+}
+
 func (self *Echonetlite) MakeFrame() error {
 	if int(self.OPC) != len(self.Datactx) {
 		return errors.New("opc not matches for datactx length")
