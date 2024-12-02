@@ -48,9 +48,9 @@ type Echonetlite struct {
 }
 
 type Datactx struct {
-	epc byte   // echonetlite property
-	pdc byte   // EDT Bytes
-	edt []byte // property value
+	EPC byte   // echonetlite property
+	PDC byte   // EDT Bytes
+	EDT []byte // property value
 }
 
 func Tidinc(tid [2]byte) [2]byte {
@@ -62,6 +62,7 @@ func Tidinc(tid [2]byte) [2]byte {
 	tid[0] = byte(int_buf >> 8)
 	return tid
 }
+
 func (self *Echonetlite) MakeFrame() error {
 	if int(self.OPC) != len(self.Datactx) {
 		return errors.New("opc not matches for datactx length")
@@ -75,13 +76,15 @@ func (self *Echonetlite) MakeFrame() error {
 	frame = append(frame, self.ESV)
 	frame = append(frame, self.OPC)
 	for i := 0; i < int(self.OPC); i++ {
-		if int(self.Datactx[i].pdc) != len(self.Datactx) {
+		if int(self.Datactx[i].PDC) != len(self.Datactx[i].EDT) {
 			return errors.New("pdc don't match for edt length")
 		}
-		frame = append(frame, self.Datactx[i].epc)
-		frame = append(frame, self.Datactx[i].pdc)
-		frame = append(frame, self.Datactx[i].edt...)
+		frame = append(frame, self.Datactx[i].EPC)
+		frame = append(frame, self.Datactx[i].PDC)
+		frame = append(frame, self.Datactx[i].EDT...)
 	}
+	self.Frame = frame
+	self.Frame_size = len(frame)
 	return nil
 }
 
