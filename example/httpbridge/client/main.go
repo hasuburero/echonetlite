@@ -11,7 +11,8 @@ const (
 )
 
 const (
-	Addr          = ""
+	Scheme        = "http://"
+	Addr          = "localhost"
 	Port          = ":8080"
 	Contract_path = "/contract"
 	Data_path     = "/data"
