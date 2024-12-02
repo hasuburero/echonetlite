@@ -37,14 +37,14 @@ const (
 type Echonetlite struct {
 	Frame      []byte
 	Frame_size int
-	ehd1       byte      // Echonet lite frame header1
-	ehd2       byte      // Echonet lite frame header2
-	tid        [2]byte   // transaction id
-	seoj       [3]byte   // source echonetlite object
-	deoj       [3]byte   // destination echonetlite object
-	esv        byte      // echonetlite service
-	opc        byte      // number of executing property
-	datactx    []Datactx // property info
+	EHD1       byte      // Echonet lite frame header1
+	EHD2       byte      // Echonet lite frame header2
+	Tid        [2]byte   // transaction id
+	SEOJ       [3]byte   // source echonetlite object
+	DEOJ       [3]byte   // destination echonetlite object
+	ESV        byte      // echonetlite service
+	OPC        byte      // number of executing property
+	Datactx    []Datactx // property info
 }
 
 type Datactx struct {
@@ -53,30 +53,39 @@ type Datactx struct {
 	edt []byte // property value
 }
 
+func Tidinc(tid [2]byte) [2]byte {
+	var int_buf int = 0
+	int_buf = int(tid[0]) << 8
+	int_buf += int(tid[1])
+	int_buf += 1
+	tid[1] = byte(int_buf)
+	tid[0] = byte(int_buf >> 8)
+	return tid
+}
 func (self *Echonetlite) MakeFrame() error {
-	if int(self.opc) != len(self.datactx) {
+	if int(self.OPC) != len(self.Datactx) {
 		return errors.New("opc not matches for datactx length")
 	}
 	var frame []byte
-	frame = append(frame, self.ehd1)
-	frame = append(frame, self.ehd2)
-	frame = append(frame, self.tid[:]...)
-	frame = append(frame, self.seoj[:]...)
-	frame = append(frame, self.deoj[:]...)
-	frame = append(frame, self.esv)
-	frame = append(frame, self.opc)
-	for i := 0; i < int(self.opc); i++ {
-		if int(self.datactx[i].pdc) != len(self.datactx) {
+	frame = append(frame, self.EHD1)
+	frame = append(frame, self.EHD2)
+	frame = append(frame, self.Tid[:]...)
+	frame = append(frame, self.SEOJ[:]...)
+	frame = append(frame, self.DEOJ[:]...)
+	frame = append(frame, self.ESV)
+	frame = append(frame, self.OPC)
+	for i := 0; i < int(self.OPC); i++ {
+		if int(self.Datactx[i].pdc) != len(self.Datactx) {
 			return errors.New("pdc don't match for edt length")
 		}
-		frame = append(frame, self.datactx[i].epc)
-		frame = append(frame, self.datactx[i].pdc)
-		frame = append(frame, self.datactx[i].edt...)
+		frame = append(frame, self.Datactx[i].epc)
+		frame = append(frame, self.Datactx[i].pdc)
+		frame = append(frame, self.Datactx[i].edt...)
 	}
 	return nil
 }
 
 func MakeInstance(ehd1, ehd2 byte, tid [2]byte, seoj, deoj [3]byte) Echonetlite {
-	echonetlite := Echonetlite{ehd1: ehd1, ehd2: ehd2, tid: tid, seoj: seoj, deoj: deoj}
+	echonetlite := Echonetlite{EHD1: ehd1, EHD2: ehd2, Tid: tid, SEOJ: seoj, DEOJ: deoj}
 	return echonetlite
 }
