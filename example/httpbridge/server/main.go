@@ -53,9 +53,9 @@ func main() {
 			gw_id := contract_data.Get_contract_request.Gw_id
 			fmt.Println(gw_id)
 			var instance echonetlite.Echonetlite
-			instance = echonetlite.MakeInstance(EHD1, EHD2, GW[gw_id].Tid,
-				Class_VGW, echonetlite.Class_SmartMeter, echonetlite.ESV_Get,
-				byte(0), []echonetlite.Datactx{})
+			instance = echonetlite.Echonetlite{EHD1: EHD1, EHD2: EHD2, Tid: GW[gw_id].Tid,
+				SEOJ: Class_VGW, DEOJ: echonetlite.Class_SmartMeter, ESV: echonetlite.ESV_Get,
+				OPC: byte(0), Datactx: []echonetlite.Datactx{}}
 			err := instance.MakeFrame()
 			if err != nil {
 				fmt.Println(err)
