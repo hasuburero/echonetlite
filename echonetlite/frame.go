@@ -115,7 +115,34 @@ func (self *Echonetlite) MakeFrame() error {
 	return nil
 }
 
-func MakeInstance(ehd1, ehd2 byte, tid [2]byte, seoj, deoj [3]byte, esv byte, opc byte, datactx []Datactx) Echonetlite {
-	echonetlite := Echonetlite{EHD1: ehd1, EHD2: ehd2, Tid: tid, SEOJ: seoj, DEOJ: deoj, ESV: esv, OPC: opc, Datactx: datactx}
-	return echonetlite
+func MakeInstance(frame []byte) Echonetlite {
+	var echonetlite_instance Echonetlite
+	echonetlite_instance = Echonetlite{EHD1: frame[0], EHD2: frame[1], Tid: [2]byte(frame[2:4]), SEOJ: [3]byte(frame[4:7]), DEOJ: [3]byte(frame[7:10]), ESV: frame[10], OPC: frame[11]}
+	index := 12
+	for index < len(frame) {
+		var datactx Datactx = Datactx{EPC: frame[index], PDC: frame[index+1]}
+		switch echonetlite_instance.ESV {
+		case ESV_Get:
+			index += 2
+		case ESV_SetC:
+			datactx.EDT = frame[index+2 : index+2+int(datactx.PDC)]
+			index += 2 + int(datactx.PDC)
+		case ESV_Get_Res:
+			if datactx.PDC != 0 {
+				datactx.EDT = frame[index+2 : index+2+int(datactx.PDC)]
+				index += 2 + int(datactx.PDC)
+			} else {
+				index += 2
+			}
+		case ESV_Set_Res:
+			if datactx.PDC != 0 {
+				datactx.EDT = frame[index+2 : index+2+int(datactx.PDC)]
+				index += 2 + int(datactx.PDC)
+			} else {
+				index += 2
+			}
+		}
+		echonetlite_instance.Datactx = append(echonetlite_instance.Datactx, datactx)
+	}
+	return echonetlite_instance
 }
