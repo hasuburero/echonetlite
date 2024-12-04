@@ -108,8 +108,8 @@ func (self *GW_instance) Contract() (string, error) {
 	return ctx.frame, nil
 }
 
-func Init(Gw_id, Addr, Port, Contract_path, Data_path string) GW_instance {
-	gw := GW_instance{Gw_id: Gw_id, Addr: Addr, Port: Port,
+func Init(Gw_id, Scheme, Addr, Port, Contract_path, Data_path string) GW_instance {
+	gw := GW_instance{Gw_id: Gw_id, Scheme: Scheme, Addr: Addr, Port: Port,
 		Contract_path: Contract_path,
 		Data_path:     Data_path}
 	return gw

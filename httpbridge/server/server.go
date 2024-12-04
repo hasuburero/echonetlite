@@ -7,7 +7,12 @@ import (
 	"github.com/hasuburero/echonetlite/echonetlite"
 	"io"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 )
+
+var Sig chan os.Signal
 
 // data structure witch through the api channel
 type Contract_context struct {
@@ -18,8 +23,6 @@ type Contract_context struct {
 type Data_context struct {
 	Post_data_request Post_data_request
 }
-
-//////////////////////////////////////////////
 
 // http request body structure
 type Get_contract_request struct {
@@ -34,8 +37,6 @@ type Post_data_request struct {
 type Get_contract_response struct {
 	Frame string `json:"frame"`
 }
-
-/////////////////////////////////////
 
 type Echonet_instance struct {
 	Read_recv_contract chan Contract_context
@@ -89,15 +90,22 @@ func (self *Echonet_instance) Data(w http.ResponseWriter, r *http.Request) {
 }
 
 func Init(addr, port, contract, data string) Echonet_instance {
+	Sig = make(chan os.Signal)
+	signal.Notify(Sig, syscall.SIGINT)
 	var echonet_instance Echonet_instance = Echonet_instance{make(chan Contract_context), make(chan Data_context)}
 	server := http.Server{
-		Addr: addr + ":" + port,
+		Addr: addr + port,
 	}
 
 	http.HandleFunc(contract, echonet_instance.Contract)
 	http.HandleFunc(data, echonet_instance.Data)
 
-	go server.ListenAndServe()
+	go func() {
+		err := server.ListenAndServe()
+		if err != nil {
+
+		}
+	}()
 
 	return echonet_instance
 }

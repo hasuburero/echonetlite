@@ -70,7 +70,7 @@ func control(frame string) string { // dammy function
 func gw_func(arg int) {
 	var gw_id string
 	gw_id = fmt.Sprintf("%d", arg)
-	gw_instance := client.Init(gw_id, Addr, Port, Contract_path, Data_path)
+	gw_instance := client.Init(gw_id, Scheme, Addr, Port, Contract_path, Data_path)
 	for {
 		frame, err := gw_instance.Contract()
 		if err != nil {

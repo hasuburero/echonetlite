@@ -41,12 +41,14 @@ type GW_struct struct {
 var GW map[string]GW_struct
 
 func main() {
+	GW = make(map[string]GW_struct)
 	for i := range GW_num {
 		gw_id := strconv.Itoa(i)
 		GW[gw_id] = GW_struct{Gw_id: gw_id, Tid: [2]byte{0, 0}}
 	}
 
 	Bridge_instance := server.Init(addr, port, contract_path, data_path)
+	fmt.Println("echonetlite bridge server started")
 	for {
 		select {
 		case contract_data := <-Bridge_instance.Read_recv_contract:
