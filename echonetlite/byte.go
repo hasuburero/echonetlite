@@ -7,7 +7,20 @@ import (
 
 const (
 	shift_byte = 8
+	bytesize   = 256
 )
+
+func ByteSize(arg uint) int {
+	var i int = 0
+	for ; i < 4; i++ {
+		arg = arg / bytesize
+		if arg == 0 {
+			break
+		}
+	}
+
+	return i + 1
+}
 
 func Byte2Int(arg1 []byte, arg2 int) (int, error) {
 	var int_size int = int(unsafe.Sizeof(int(0)))
