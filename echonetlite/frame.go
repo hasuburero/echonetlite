@@ -103,12 +103,15 @@ func (self *Echonetlite) MakeFrame() error {
 	frame = append(frame, self.ESV)
 	frame = append(frame, self.OPC)
 	for i := 0; i < int(self.OPC); i++ {
-		if int(self.Datactx[i].PDC) != len(self.Datactx[i].EDT) {
-			return errors.New("pdc don't match for edt length")
-		}
 		frame = append(frame, self.Datactx[i].EPC)
 		frame = append(frame, self.Datactx[i].PDC)
-		frame = append(frame, self.Datactx[i].EDT...)
+		if int(self.Datactx[i].PDC) != len(self.Datactx[i].EDT) {
+			return errors.New("pdc don't match for edt length")
+		} else if self.Datactx[i].PDC == 0 {
+			continue
+		} else {
+			frame = append(frame, self.Datactx[i].EDT...)
+		}
 	}
 	self.Frame = frame
 	self.Frame_size = len(frame)
