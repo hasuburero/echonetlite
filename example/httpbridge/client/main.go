@@ -21,7 +21,7 @@ const (
 
 var wait chan bool
 
-func recvFrame(frame string) string {
+func recvFrame(frame string) (string, error) {
 	echonet_instance := echonetlite.MakeInstance([]byte(frame))
 	var buf [3]byte
 	var byte_buf []byte
@@ -33,30 +33,33 @@ func recvFrame(frame string) string {
 		buf = echonet_instance.SEOJ
 		echonet_instance.SEOJ = echonet_instance.DEOJ
 		echonet_instance.DEOJ = buf
+		for i, _ := range echonet_instance.Datactx {
+			echonet_instance.Datactx[i].EDT = byte_buf[:echonet_instance.Datactx[i].PDC]
+		}
+		echonet_instance.ESV = echonetlite.ESV_Get_Res
 	case echonetlite.ESV_SetC:
 		buf = echonet_instance.SEOJ
 		echonet_instance.SEOJ = echonet_instance.DEOJ
 		echonet_instance.DEOJ = buf
-	case echonetlite.ESV_Get_Res:
 		for i, _ := range echonet_instance.Datactx {
 			echonet_instance.Datactx[i].EDT = byte_buf[:echonet_instance.Datactx[i].PDC]
 		}
-	case echonetlite.ESV_Set_Res:
-		for i, _ := range echonet_instance.Datactx {
-			echonet_instance.Datactx[i].EDT = byte_buf[:echonet_instance.Datactx[i].PDC]
-		}
+		echonet_instance.ESV = echonetlite.ESV_Set_Res
 	}
 
-	return
+	err := echonet_instance.MakeFrame()
+	return string(echonet_instance.Frame), err
 }
 
 func control(frame string) string { // dammy function
 	fmt.Print("> ")
 	fmt.Println([]byte(frame))
 
-	frame = recvFrame()
-
-	echonet_instance := echonetlite.MakeInstance(frame)
+	frame, err := recvFrame(frame)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("recvFrame error")
+	}
 
 	fmt.Print("< ")
 	fmt.Println([]byte(frame))
