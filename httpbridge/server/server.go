@@ -91,7 +91,7 @@ func (self *Echonet_instance) Data(w http.ResponseWriter, r *http.Request) {
 
 func Init(addr, port, contract, data string) Echonet_instance {
 	Sig = make(chan os.Signal)
-	signal.Notify(Sig, syscall.SIGINT)
+	signal.Notify(Sig, syscall.SIGTERM)
 	var echonet_instance Echonet_instance = Echonet_instance{make(chan Contract_context), make(chan Data_context)}
 	server := http.Server{
 		Addr: addr + port,
