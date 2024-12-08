@@ -2,6 +2,7 @@ package echonetlite
 
 import (
 	"errors"
+	"fmt"
 )
 
 type ClassDefinition struct {
@@ -63,10 +64,65 @@ func Tidinc(tid [2]byte) [2]byte {
 	return tid
 }
 
+func CalcByte(frame []byte) {
+}
+
+func (self *Echonetlite) ShowInstanceFrame() {
+	length := 12
+	fmt.Printf("EHD1:%x EHD2:%x ", self.EHD1, self.EHD2)
+	fmt.Printf("Tid:%x%x ", self.Tid[0], self.Tid[1])
+	fmt.Printf("SEOJ:%x%x%x ", self.SEOJ[0], self.SEOJ[1], self.SEOJ[2])
+	fmt.Printf("DEOJ:%x%x%x ", self.DEOJ[0], self.DEOJ[1], self.DEOJ[2])
+	fmt.Printf("ESV:%x OPC:%x ", self.ESV, self.OPC)
+	for _, ctx := range self.Datactx {
+		fmt.Printf("EPC:%x PDC:%x ", ctx.EPC, ctx.PDC)
+		length += 2
+		if ctx.PDC == 0 {
+			continue
+		} else {
+			fmt.Printf("EDT:")
+			for _, ctx := range ctx.EDT {
+				fmt.Printf("%x", ctx)
+				length++
+			}
+			fmt.Printf(" ")
+		}
+	}
+	fmt.Println("")
+	fmt.Println(length)
+}
+
+func ShowByteFrame(frame []byte) {
+	fmt.Printf("EHD1:%x EHD2:%x ", frame[0], frame[1])
+	fmt.Printf("Tid:%x%x ", frame[2], frame[3])
+	fmt.Printf("SEOJ:%x%x%x ", frame[4], frame[5], frame[6])
+	fmt.Printf("DEOJ:%x%x%x ", frame[7], frame[8], frame[9])
+	fmt.Printf("ESV:%x OPC:%x ", frame[10], frame[11])
+	index := 0
+	for _ = range int(frame[11]) {
+		fmt.Printf("EPC:%x PDC:%x ", frame[12+index], frame[12+index+1])
+		index += 2
+		if frame[12+index-1] == 0 {
+			continue
+		} else {
+			fmt.Printf("EDT:")
+			i := 0
+			for _ = range int(frame[index-1]) {
+				fmt.Printf("%x", frame[index+i])
+				i++
+			}
+			fmt.Printf(" ")
+			index += i
+		}
+	}
+	fmt.Println("")
+}
+
 func (self *Echonetlite) ReverseFrame() error {
 	if len(self.Frame) == 0 {
 		return errors.New("0 length frame")
 	}
+	index := 0
 	self.Frame_size = len(self.Frame)
 	self.EHD1 = self.Frame[0]
 	self.EHD2 = self.Frame[1]
@@ -75,18 +131,22 @@ func (self *Echonetlite) ReverseFrame() error {
 	self.DEOJ = [3]byte{self.Frame[7], self.Frame[8], self.Frame[9]}
 	self.ESV = self.Frame[10]
 	self.OPC = self.Frame[11]
+	index += 12
 	if self.OPC == 0 {
 		return nil
 	}
 
 	for i := 12; i < self.Frame_size; {
 		var datactx Datactx = Datactx{EPC: self.Frame[i], PDC: self.Frame[i+1]}
+		index += 2
 		for j := range int(datactx.PDC) {
 			datactx.EDT = append(datactx.EDT, self.Frame[i+2+j])
+			index += 1
 		}
 		i += 2 + int(datactx.PDC)
 		self.Datactx = append(self.Datactx, datactx)
 	}
+	self.Frame_size = index
 	return nil
 }
 
@@ -102,19 +162,25 @@ func (self *Echonetlite) MakeFrame() error {
 	frame = append(frame, self.DEOJ[:]...)
 	frame = append(frame, self.ESV)
 	frame = append(frame, self.OPC)
+	index := 12
 	for i := 0; i < int(self.OPC); i++ {
 		frame = append(frame, self.Datactx[i].EPC)
 		frame = append(frame, self.Datactx[i].PDC)
+		index += 2
 		if int(self.Datactx[i].PDC) != len(self.Datactx[i].EDT) {
 			return errors.New("pdc don't match for edt length")
 		} else if self.Datactx[i].PDC == 0 {
 			continue
 		} else {
+			index += int(self.Datactx[i].PDC)
 			frame = append(frame, self.Datactx[i].EDT...)
 		}
 	}
 	self.Frame = frame
 	self.Frame_size = len(frame)
+	fmt.Println(self.Frame_size)
+	self.Frame_size = index
+	fmt.Println(self.Frame_size)
 	return nil
 }
 
@@ -122,6 +188,7 @@ func MakeInstance(frame []byte) Echonetlite {
 	var echonetlite_instance Echonetlite
 	echonetlite_instance = Echonetlite{EHD1: frame[0], EHD2: frame[1], Tid: [2]byte(frame[2:4]), SEOJ: [3]byte(frame[4:7]), DEOJ: [3]byte(frame[7:10]), ESV: frame[10], OPC: frame[11]}
 	index := 12
+	fmt.Println(echonetlite_instance)
 	for index < len(frame) {
 		var datactx Datactx = Datactx{EPC: frame[index], PDC: frame[index+1]}
 		switch echonetlite_instance.ESV {
@@ -144,8 +211,10 @@ func MakeInstance(frame []byte) Echonetlite {
 			} else {
 				index += 2
 			}
+		default:
 		}
 		echonetlite_instance.Datactx = append(echonetlite_instance.Datactx, datactx)
 	}
+	echonetlite_instance.Frame_size = index
 	return echonetlite_instance
 }

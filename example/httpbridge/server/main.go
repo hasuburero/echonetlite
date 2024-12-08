@@ -52,8 +52,8 @@ func main() {
 	for {
 		select {
 		case contract_data := <-Bridge_instance.Read_recv_contract:
+			fmt.Println("receive contract")
 			gw_id := contract_data.Get_contract_request.Gw_id
-			fmt.Println(gw_id)
 			var instance echonetlite.Echonetlite
 			instance = echonetlite.Echonetlite{EHD1: EHD1, EHD2: EHD2, Tid: GW[gw_id].Tid,
 				SEOJ: Class_VGW, DEOJ: echonetlite.Class_SmartMeter, ESV: echonetlite.ESV_Get,
@@ -64,12 +64,17 @@ func main() {
 				fmt.Println("echonetlite.Echonetlite.MakeFrame error")
 				os.Exit(1)
 			}
+			for _, ctx := range []byte(instance.Frame) {
+				fmt.Printf("%x ", ctx)
+			}
+			fmt.Println("")
+			instance.ShowInstanceFrame()
 			contract_data.Return_channel <- instance
 		case data_data := <-Bridge_instance.Read_recv_data:
-			gw_id := data_data.Post_data_request.Gw_id
+			fmt.Println("receive data")
+			//gw_id := data_data.Post_data_request.Gw_id
 			frame := data_data.Post_data_request.Frame
-			fmt.Println(gw_id)
-			fmt.Println(frame)
+
 			var echonetlite = echonetlite.Echonetlite{Frame: []byte(frame)}
 			err := echonetlite.ReverseFrame()
 			if err != nil {
@@ -77,9 +82,7 @@ func main() {
 				fmt.Println("echonetlite.Echonetlite.ReverseFrame error")
 				os.Exit(1)
 			}
-			fmt.Println(echonetlite)
 		}
 	}
-
 	return
 }

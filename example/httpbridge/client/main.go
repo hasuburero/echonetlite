@@ -45,6 +45,8 @@ func recvFrame(frame string) (string, error) {
 			echonet_instance.Datactx[i].EDT = byte_buf[:echonet_instance.Datactx[i].PDC]
 		}
 		echonet_instance.ESV = echonetlite.ESV_Set_Res
+	default:
+		fmt.Println("default case")
 	}
 
 	err := echonet_instance.MakeFrame()
@@ -53,7 +55,11 @@ func recvFrame(frame string) (string, error) {
 
 func control(frame string) string { // dammy function
 	fmt.Print("> ")
-	fmt.Println([]byte(frame))
+	for _, ctx := range []byte(frame) {
+		fmt.Printf("%x ", ctx)
+	}
+	fmt.Println("")
+	echonetlite.ShowByteFrame([]byte(frame))
 
 	frame, err := recvFrame(frame)
 	if err != nil {
@@ -70,6 +76,7 @@ func control(frame string) string { // dammy function
 func gw_func(arg int) {
 	var gw_id string
 	gw_id = fmt.Sprintf("%d", arg)
+	fmt.Println(gw_id)
 	gw_instance := client.Init(gw_id, Scheme, Addr, Port, Contract_path, Data_path)
 	for {
 		frame, err := gw_instance.Contract()
@@ -79,11 +86,12 @@ func gw_func(arg int) {
 			time.Sleep(time.Second * 2)
 			continue
 		}
-		fmt.Println(string(frame))
-		go func() {
-			frame = control(frame)
-			gw_instance.Data(frame)
-		}()
+		frame = control(frame)
+		gw_instance.Data(frame)
+		//go func() {
+		//	frame = control(frame)
+		//	gw_instance.Data(frame)
+		//}()
 	}
 }
 

@@ -46,6 +46,7 @@ type Echonet_instance struct {
 func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
 	length := r.ContentLength
 	reqBody := make([]byte, length)
+	r.Body.Read(reqBody)
 	var ctx Get_contract_request
 	err := json.Unmarshal(reqBody, &ctx)
 	if err != nil {
@@ -55,9 +56,14 @@ func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
 	}
 	var recv_context Contract_context = Contract_context{ctx, make(chan echonetlite.Echonetlite)}
 	self.Read_recv_contract <- recv_context
-	echonetlite := <-recv_context.Return_channel
+	echonet_instance := <-recv_context.Return_channel
 
-	frame := Get_contract_response{Frame: string(echonetlite.Frame[:echonetlite.Frame_size])}
+	frame := Get_contract_response{Frame: string(echonet_instance.Frame[:echonet_instance.Frame_size])}
+
+	fmt.Println("debug")
+	echonetlite.ShowByteFrame(echonet_instance.Frame)
+	echonetlite.ShowByteFrame([]byte(frame.Frame))
+
 	json_buf, err := json.Marshal(frame)
 	if err != nil {
 		fmt.Println(err)
@@ -103,7 +109,9 @@ func Init(addr, port, contract, data string) Echonet_instance {
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
-
+			fmt.Println(err)
+			fmt.Println("http.Server.ListenAndServe error")
+			os.Exit(1)
 		}
 	}()
 
