@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/hasuburero/echonetlite/echonetlite"
+	"github.com/hasuburero/echonetlite/echonetlite/class/bat"
 	"github.com/hasuburero/echonetlite/httpbridge/server"
 	"os"
 	"strconv"
@@ -56,8 +57,9 @@ func main() {
 			gw_id := contract_data.Get_contract_request.Gw_id
 			var instance echonetlite.Echonetlite
 			instance = echonetlite.Echonetlite{EHD1: EHD1, EHD2: EHD2, Tid: GW[gw_id].Tid,
-				SEOJ: Class_VGW, DEOJ: echonetlite.Class_SmartMeter, ESV: echonetlite.ESV_Get,
-				OPC: byte(0), Datactx: []echonetlite.Datactx{}}
+				SEOJ: Class_VGW, DEOJ: echonetlite.Class_Battery, ESV: echonetlite.ESV_Get,
+				OPC: byte(1)}
+			instance.Datactx = append(instance.Datactx, echonetlite.Datactx{EPC: bat.SOC.EPC, PDC: bat.SOC.Size})
 			err := instance.MakeFrame()
 			if err != nil {
 				fmt.Println(err)

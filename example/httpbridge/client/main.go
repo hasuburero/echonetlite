@@ -22,7 +22,11 @@ const (
 var wait chan bool
 
 func recvFrame(frame string) (string, error) {
+	fmt.Println("--- debug ---")
+	echonetlite.ShowByteFrame([]byte(frame))
 	echonet_instance := echonetlite.MakeInstance([]byte(frame))
+	fmt.Println("--- debug ---")
+	echonet_instance.ShowInstanceFrame()
 	var buf [3]byte
 	var byte_buf []byte
 	for i := range 4 {
@@ -50,15 +54,12 @@ func recvFrame(frame string) (string, error) {
 	}
 
 	err := echonet_instance.MakeFrame()
+	echonet_instance.ShowInstanceFrame()
 	return string(echonet_instance.Frame), err
 }
 
 func control(frame string) string { // dammy function
 	fmt.Print("> ")
-	for _, ctx := range []byte(frame) {
-		fmt.Printf("%x ", ctx)
-	}
-	fmt.Println("")
 	echonetlite.ShowByteFrame([]byte(frame))
 
 	frame, err := recvFrame(frame)
@@ -86,12 +87,16 @@ func gw_func(arg int) {
 			time.Sleep(time.Second * 2)
 			continue
 		}
+
+		// test case
 		frame = control(frame)
 		gw_instance.Data(frame)
+		// default case
 		//go func() {
 		//	frame = control(frame)
 		//	gw_instance.Data(frame)
 		//}()
+		time.Sleep(time.Second * 1)
 	}
 }
 
