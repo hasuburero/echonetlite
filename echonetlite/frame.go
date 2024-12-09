@@ -163,6 +163,12 @@ func (self *Echonetlite) MakeFrame() error {
 	frame = append(frame, self.ESV)
 	frame = append(frame, self.OPC)
 	index := 12
+
+	//wip
+	if self.ESV == ESV_Get {
+		frame = append(frame, self.Datactx[i].EPC)
+		frame = append(frame, self.Datactx[i].PDC)
+	}
 	for i := 0; i < int(self.OPC); i++ {
 		frame = append(frame, self.Datactx[i].EPC)
 		frame = append(frame, self.Datactx[i].PDC)
@@ -188,7 +194,6 @@ func MakeInstance(frame []byte) Echonetlite {
 	var echonetlite_instance Echonetlite
 	echonetlite_instance = Echonetlite{EHD1: frame[0], EHD2: frame[1], Tid: [2]byte(frame[2:4]), SEOJ: [3]byte(frame[4:7]), DEOJ: [3]byte(frame[7:10]), ESV: frame[10], OPC: frame[11]}
 	index := 12
-	fmt.Println(echonetlite_instance)
 	for index < len(frame) {
 		var datactx Datactx = Datactx{EPC: frame[index], PDC: frame[index+1]}
 		switch echonetlite_instance.ESV {
