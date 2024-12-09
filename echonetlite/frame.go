@@ -166,8 +166,10 @@ func (self *Echonetlite) MakeFrame() error {
 
 	//wip
 	if self.ESV == ESV_Get {
-		frame = append(frame, self.Datactx[i].EPC)
-		frame = append(frame, self.Datactx[i].PDC)
+		for i := 0; i < int(self.OPC); i++ {
+			frame = append(frame, self.Datactx[i].EPC)
+			frame = append(frame, self.Datactx[i].PDC)
+		}
 	}
 	for i := 0; i < int(self.OPC); i++ {
 		frame = append(frame, self.Datactx[i].EPC)
