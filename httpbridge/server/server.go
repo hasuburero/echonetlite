@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/hasuburero/echonetlite/echonetlite"
@@ -58,11 +59,7 @@ func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
 	self.Read_recv_contract <- recv_context
 	echonet_instance := <-recv_context.Return_channel
 
-	frame := Get_contract_response{Frame: string(echonet_instance.Frame[:echonet_instance.Frame_size])}
-
-	fmt.Println("debug")
-	echonetlite.ShowByteFrame(echonet_instance.Frame)
-	echonetlite.ShowByteFrame([]byte(frame.Frame))
+	frame := Get_contract_response{Frame: base64.StdEncoding.EncodeToString(echonet_instance.Frame[:echonet_instance.Frame_size])}
 
 	json_buf, err := json.Marshal(frame)
 	if err != nil {
@@ -88,6 +85,8 @@ func (self *Echonet_instance) Data(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("json.Unmarshal error")
 		return
 	}
+	byte_buf, err := base64.RawStdEncoding.DecodeString(ctx.Frame)
+	ctx.Frame = string(byte_buf)
 	var recv_context Data_context = Data_context{ctx}
 	self.Read_recv_data <- recv_context
 

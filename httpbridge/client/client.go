@@ -2,9 +2,10 @@ package client
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/hasuburero/echonetlite/echonetlite"
+	//"github.com/hasuburero/echonetlite/echonetlite"
 	"io"
 	"net/http"
 )
@@ -39,6 +40,7 @@ type GW_instance struct {
 var wait chan bool
 
 func (self *GW_instance) Data(frame string) error {
+	frame = base64.StdEncoding.EncodeToString([]byte(frame))
 	request := Post_data_request{Gw_id: self.Gw_id, Frame: frame}
 	json_buf, err := json.Marshal(request)
 	if err != nil {
@@ -106,15 +108,9 @@ func (self *GW_instance) Contract() (string, error) {
 		fmt.Println(err)
 		return "", err
 	}
+	byte_buf, err := base64.StdEncoding.DecodeString(ctx.Frame)
+	ctx.Frame = string(byte_buf)
 
-	//debug
-	fmt.Println(len(ctx.Frame))
-	for _, ctx := range []byte(ctx.Frame) {
-		fmt.Printf("%x ", ctx)
-	}
-	fmt.Println("")
-	fmt.Printf("contract:")
-	echonetlite.ShowByteFrame([]byte(ctx.Frame))
 	return ctx.Frame, nil
 }
 
