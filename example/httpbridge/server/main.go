@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	GW_num = 2
+	GW_num = 1
 )
 
 var (
@@ -77,13 +77,15 @@ func main() {
 			//gw_id := data_data.Post_data_request.Gw_id
 			frame := data_data.Post_data_request.Frame
 
-			var echonetlite = echonetlite.Echonetlite{Frame: []byte(frame)}
-			err := echonetlite.ReverseFrame()
+			echonet_instance := echonetlite.MakeInstance([]byte(frame))
+			err := echonet_instance.ReverseFrame()
 			if err != nil {
 				fmt.Println(err)
 				fmt.Println("echonetlite.Echonetlite.ReverseFrame error")
 				os.Exit(1)
 			}
+			fmt.Print("data:")
+			echonet_instance.ShowInstanceFrame()
 		}
 	}
 	return

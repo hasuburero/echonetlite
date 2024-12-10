@@ -64,9 +64,6 @@ func Tidinc(tid [2]byte) [2]byte {
 	return tid
 }
 
-func CalcByte(frame []byte) {
-}
-
 func (self *Echonetlite) ShowInstanceFrame() {
 	length := 12
 	fmt.Printf("EHD1:%x EHD2:%x ", self.EHD1, self.EHD2)
@@ -77,15 +74,21 @@ func (self *Echonetlite) ShowInstanceFrame() {
 	for _, ctx := range self.Datactx {
 		fmt.Printf("EPC:%x PDC:%x ", ctx.EPC, ctx.PDC)
 		length += 2
-		if ctx.PDC == 0 {
+		switch self.ESV {
+		case ESV_Get:
 			continue
-		} else {
-			fmt.Printf("EDT:")
-			for _, ctx := range ctx.EDT {
-				fmt.Printf("%x", ctx)
-				length++
+		case ESV_Get_Res:
+			fmt.Print("EDT:")
+			for _, buf := range ctx.EDT {
+				fmt.Printf("%x", buf)
 			}
-			fmt.Printf(" ")
+			fmt.Print(" ")
+		case ESV_SetC:
+			fmt.Print("EDT:")
+			for _, buf := range ctx.EDT {
+				fmt.Printf("%x", buf)
+			}
+			fmt.Print(" ")
 		}
 	}
 	fmt.Println("")
@@ -98,21 +101,20 @@ func ShowByteFrame(frame []byte) {
 	fmt.Printf("SEOJ:%x%x%x ", frame[4], frame[5], frame[6])
 	fmt.Printf("DEOJ:%x%x%x ", frame[7], frame[8], frame[9])
 	fmt.Printf("ESV:%x OPC:%x ", frame[10], frame[11])
-	index := 0
+	index := 12
 	for _ = range int(frame[11]) {
-		fmt.Printf("EPC:%x PDC:%x ", frame[12+index], frame[12+index+1])
+		fmt.Printf("EPC:%x PDC:%x ", frame[index], frame[index+1])
 		index += 2
-		if frame[12+index-1] == 0 {
+		switch frame[10] {
+		case ESV_Get:
 			continue
-		} else {
-			fmt.Printf("EDT:")
-			i := 0
+		case ESV_SetC:
+			fmt.Print("EDT:")
 			for _ = range int(frame[index-1]) {
-				fmt.Printf("%x", frame[index+i])
-				i++
+				fmt.Printf("%x", frame[index])
+				index += 1
 			}
 			fmt.Printf(" ")
-			index += i
 		}
 	}
 	fmt.Println("")
@@ -131,19 +133,34 @@ func (self *Echonetlite) ReverseFrame() error {
 	self.DEOJ = [3]byte{self.Frame[7], self.Frame[8], self.Frame[9]}
 	self.ESV = self.Frame[10]
 	self.OPC = self.Frame[11]
-	index += 12
+	index = 12
 	if self.OPC == 0 {
-		return nil
+		return errors.New("non OPC")
 	}
 
-	for i := 12; i < self.Frame_size; {
-		var datactx Datactx = Datactx{EPC: self.Frame[i], PDC: self.Frame[i+1]}
+	limit := self.Frame_size
+	for index < limit {
+		var datactx Datactx = Datactx{EPC: self.Frame[index], PDC: self.Frame[index+1]}
 		index += 2
-		for j := range int(datactx.PDC) {
-			datactx.EDT = append(datactx.EDT, self.Frame[i+2+j])
-			index += 1
+		switch self.ESV {
+		case ESV_Get:
+			continue
+		case ESV_Get_Res:
+			for _ = range int(datactx.PDC) {
+				datactx.EDT = append(datactx.EDT, self.Frame[index])
+				index += 1
+			}
+		case ESV_SetC:
+			for _ = range int(datactx.PDC) {
+				datactx.EDT = append(datactx.EDT, self.Frame[index])
+				index += 1
+			}
+		case ESV_Set_Res:
+			for _ = range int(datactx.PDC) {
+				datactx.EDT = append(datactx.EDT, self.Frame[index])
+				index += 1
+			}
 		}
-		i += 2 + int(datactx.PDC)
 		self.Datactx = append(self.Datactx, datactx)
 	}
 	self.Frame_size = index
@@ -162,32 +179,54 @@ func (self *Echonetlite) MakeFrame() error {
 	frame = append(frame, self.DEOJ[:]...)
 	frame = append(frame, self.ESV)
 	frame = append(frame, self.OPC)
-	index := 12
+	size := 12
 
 	//wip
-	if self.ESV == ESV_Get {
+	switch self.ESV {
+	case ESV_Get:
 		for i := 0; i < int(self.OPC); i++ {
 			frame = append(frame, self.Datactx[i].EPC)
 			frame = append(frame, self.Datactx[i].PDC)
+			size += 2
 		}
-	}
-	for i := 0; i < int(self.OPC); i++ {
-		frame = append(frame, self.Datactx[i].EPC)
-		frame = append(frame, self.Datactx[i].PDC)
-		index += 2
-		if int(self.Datactx[i].PDC) != len(self.Datactx[i].EDT) {
-			return errors.New("pdc don't match for edt length")
-		} else if self.Datactx[i].PDC == 0 {
-			continue
-		} else {
-			index += int(self.Datactx[i].PDC)
+	case ESV_SetC:
+		for i := 0; i < int(self.OPC); i++ {
+			frame = append(frame, self.Datactx[i].EPC)
+			frame = append(frame, self.Datactx[i].PDC)
+			size += 2
+			if int(self.Datactx[i].PDC) != len(self.Datactx[i].EDT) {
+				return errors.New("pdc don't match for edt length")
+			}
+			size += int(self.Datactx[i].PDC)
+		}
+	case ESV_Get_Res:
+		for i := 0; i < int(self.OPC); i++ {
+			frame = append(frame, self.Datactx[i].EPC)
+			frame = append(frame, self.Datactx[i].PDC)
+			size += 2
+			if int(self.Datactx[i].PDC) != len(self.Datactx[i].EDT) {
+				return errors.New("pdc don't match for edt length")
+			}
 			frame = append(frame, self.Datactx[i].EDT...)
+			size += int(self.Datactx[i].PDC)
+		}
+	case ESV_Set_Res:
+		for i := 0; i < int(self.OPC); i++ {
+			frame = append(frame, self.Datactx[i].EPC)
+			frame = append(frame, self.Datactx[i].PDC)
+			size += 2
+			if int(self.Datactx[i].PDC) != len(self.Datactx[i].EDT) {
+				return errors.New("pdc don't match for edt length")
+			}
+			frame = append(frame, self.Datactx[i].EDT...)
+			size += int(self.Datactx[i].PDC)
 		}
 	}
+
 	self.Frame = frame
 	self.Frame_size = len(frame)
 	fmt.Println(self.Frame_size)
-	self.Frame_size = index
+	self.Frame_size = size
 	fmt.Println(self.Frame_size)
 	return nil
 }

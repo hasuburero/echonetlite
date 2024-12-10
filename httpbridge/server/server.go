@@ -78,6 +78,7 @@ func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
 func (self *Echonet_instance) Data(w http.ResponseWriter, r *http.Request) {
 	length := r.ContentLength
 	reqBody := make([]byte, length)
+	r.Body.Read(reqBody)
 	var ctx Post_data_request
 	err := json.Unmarshal(reqBody, &ctx)
 	if err != nil {

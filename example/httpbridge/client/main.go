@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	gw_num = 2
+	gw_num = 1
 )
 
 const (
@@ -69,7 +69,7 @@ func control(frame string) string { // dammy function
 	}
 
 	fmt.Print("< ")
-	fmt.Println([]byte(frame))
+	echonetlite.ShowByteFrame([]byte(frame))
 
 	return frame
 }
