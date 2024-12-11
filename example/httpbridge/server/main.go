@@ -20,10 +20,12 @@ var (
 )
 
 const (
-	addr          = ""
-	port          = ":8080"
-	contract_path = "/contract"
-	data_path     = "/data"
+	addr               = ""
+	port               = ":8080"
+	contract_path      = "/contract"
+	data_path          = "/data"
+	StatusOK           = 200
+	StatusUnauthorized = 401
 )
 
 const (
@@ -54,6 +56,7 @@ func main() {
 		select {
 		case contract_data := <-Bridge_instance.Read_recv_contract:
 			fmt.Println("receive contract")
+			// here is good place to verify gw_id
 			gw_id := contract_data.Get_contract_request.Gw_id
 			var instance echonetlite.Echonetlite
 			instance = echonetlite.Echonetlite{EHD1: EHD1, EHD2: EHD2, Tid: GW[gw_id].Tid,
@@ -69,9 +72,10 @@ func main() {
 			for _, ctx := range []byte(instance.Frame) {
 				fmt.Printf("%x ", ctx)
 			}
+
 			fmt.Println("")
 			instance.ShowInstanceFrame()
-			contract_data.Return_channel <- instance
+			contract_data.Return_channel <- server.ReturnChannel{Echonet_instance: instance, StatusCode: StatusOK}
 		case data_data := <-Bridge_instance.Read_recv_data:
 			fmt.Println("receive data")
 			//gw_id := data_data.Post_data_request.Gw_id
