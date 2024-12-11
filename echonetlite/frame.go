@@ -115,6 +115,20 @@ func ShowByteFrame(frame []byte) {
 				index += 1
 			}
 			fmt.Printf(" ")
+		case ESV_Get_Res:
+			fmt.Print("EDT:")
+			for _ = range int(frame[index-1]) {
+				fmt.Printf("%x", frame[index])
+				index += 1
+			}
+			fmt.Print(" ")
+		case ESV_Set_Res:
+			fmt.Print("EDT:")
+			for _ = range int(frame[index-1]) {
+				fmt.Printf("%x", frame[index])
+				index += 1
+			}
+			fmt.Print(" ")
 		}
 	}
 	fmt.Println("")
@@ -181,7 +195,6 @@ func (self *Echonetlite) MakeFrame() error {
 	frame = append(frame, self.OPC)
 	size := 12
 
-	//wip
 	switch self.ESV {
 	case ESV_Get:
 		for i := 0; i < int(self.OPC); i++ {
@@ -237,26 +250,18 @@ func MakeInstance(frame []byte) Echonetlite {
 	index := 12
 	for index < len(frame) {
 		var datactx Datactx = Datactx{EPC: frame[index], PDC: frame[index+1]}
+		index += 2
 		switch echonetlite_instance.ESV {
 		case ESV_Get:
-			index += 2
 		case ESV_SetC:
-			datactx.EDT = frame[index+2 : index+2+int(datactx.PDC)]
-			index += 2 + int(datactx.PDC)
+			datactx.EDT = frame[index : index+int(datactx.PDC)]
+			index += int(datactx.PDC)
 		case ESV_Get_Res:
-			if datactx.PDC != 0 {
-				datactx.EDT = frame[index+2 : index+2+int(datactx.PDC)]
-				index += 2 + int(datactx.PDC)
-			} else {
-				index += 2
-			}
+			datactx.EDT = frame[index : index+int(datactx.PDC)]
+			index += int(datactx.PDC)
 		case ESV_Set_Res:
-			if datactx.PDC != 0 {
-				datactx.EDT = frame[index+2 : index+2+int(datactx.PDC)]
-				index += 2 + int(datactx.PDC)
-			} else {
-				index += 2
-			}
+			datactx.EDT = frame[index : index+int(datactx.PDC)]
+			index += int(datactx.PDC)
 		default:
 		}
 		echonetlite_instance.Datactx = append(echonetlite_instance.Datactx, datactx)

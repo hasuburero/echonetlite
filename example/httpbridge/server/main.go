@@ -78,12 +78,13 @@ func main() {
 			frame := data_data.Post_data_request.Frame
 
 			echonet_instance := echonetlite.MakeInstance([]byte(frame))
-			err := echonet_instance.ReverseFrame()
-			if err != nil {
-				fmt.Println(err)
-				fmt.Println("echonetlite.Echonetlite.ReverseFrame error")
-				os.Exit(1)
-			}
+			echonetlite.ShowByteFrame([]byte(frame))
+			//err := echonet_instance.ReverseFrame()
+			//if err != nil {
+			//	fmt.Println(err)
+			//	fmt.Println("echonetlite.Echonetlite.ReverseFrame error")
+			//	os.Exit(1)
+			//}
 			fmt.Print("data:")
 			echonet_instance.ShowInstanceFrame()
 		}

@@ -53,6 +53,7 @@ func recvFrame(frame string) (string, error) {
 		fmt.Println("default case")
 	}
 
+	// debug
 	err := echonet_instance.MakeFrame()
 	echonet_instance.ShowInstanceFrame()
 	return string(echonet_instance.Frame), err
