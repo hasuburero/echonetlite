@@ -18,7 +18,7 @@ var Sig chan os.Signal
 // data structure witch through the api channel
 type Contract_context struct {
 	Get_contract_request Get_contract_request
-	Return_channel       chan echonetlite.Echonetlite
+	Return_channel       chan ReturnChannel
 }
 
 type Data_context struct {
@@ -39,6 +39,11 @@ type Get_contract_response struct {
 	Frame string `json:"frame"`
 }
 
+type ReturnChannel struct {
+	Echonet_instance echonetlite.Echonetlite
+	StatusCode       int
+}
+
 type Echonet_instance struct {
 	Read_recv_contract chan Contract_context
 	Read_recv_data     chan Data_context
@@ -55,23 +60,30 @@ func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("json.Unmarshal error")
 		return
 	}
-	var recv_context Contract_context = Contract_context{ctx, make(chan echonetlite.Echonetlite)}
+
+	var return_channel = make(chan ReturnChannel)
+	defer close(return_channel)
+	var recv_context Contract_context = Contract_context{Get_contract_request: ctx, Return_channel: return_channel}
 	self.Read_recv_contract <- recv_context
-	echonet_instance := <-recv_context.Return_channel
+	return_ctx := <-recv_context.Return_channel
 
-	frame := Get_contract_response{Frame: base64.StdEncoding.EncodeToString(echonet_instance.Frame[:echonet_instance.Frame_size])}
+	if return_ctx.StatusCode == http.StatusOK {
+		frame := Get_contract_response{Frame: base64.StdEncoding.EncodeToString(return_ctx.Echonet_instance.Frame[:return_ctx.Echonet_instance.Frame_size])}
 
-	json_buf, err := json.Marshal(frame)
-	if err != nil {
-		fmt.Println(err)
-		fmt.Println("json.Marshal error")
-		return
-	}
-	body := bytes.NewBuffer(json_buf)
-	_, err = io.Copy(w, body)
-	if err != nil {
-		fmt.Println("io.Copy error")
-		return
+		json_buf, err := json.Marshal(frame)
+		if err != nil {
+			fmt.Println(err)
+			fmt.Println("json.Marshal error")
+			return
+		}
+		body := bytes.NewBuffer(json_buf)
+		_, err = io.Copy(w, body)
+		if err != nil {
+			fmt.Println("io.Copy error")
+			return
+		}
+	} else {
+		w.WriteHeader(return_ctx.StatusCode)
 	}
 }
 
