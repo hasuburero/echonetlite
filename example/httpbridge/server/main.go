@@ -21,7 +21,7 @@ var (
 
 const (
 	addr               = ""
-	port               = ":8080"
+	port               = "8080"
 	contract_path      = "/contract"
 	data_path          = "/data"
 	StatusOK           = 200

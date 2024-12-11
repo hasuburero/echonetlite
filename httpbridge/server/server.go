@@ -112,7 +112,7 @@ func Init(addr, port, contract, data string) Echonet_instance {
 	signal.Notify(Sig, syscall.SIGTERM)
 	var echonet_instance Echonet_instance = Echonet_instance{make(chan Contract_context), make(chan Data_context)}
 	server := http.Server{
-		Addr: addr + port,
+		Addr: addr + ":" + port,
 	}
 
 	http.HandleFunc(contract, echonet_instance.Contract)
