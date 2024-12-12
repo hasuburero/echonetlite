@@ -25,7 +25,13 @@ type Post_data_request struct{
 }
 ```
 
-### Bridge Start up
+### General purpose Error channel
+
+```
+var Error = make(chan error, 1)
+```
+
+### Standard sequence
 
 ```
 Init(addr, port, contract_path, data_path string) Echonet_instance
@@ -36,13 +42,20 @@ loop{
 ```
 
 ```
+type ReturnChannel struct{
+    Echonet_instance echonetlite.Echonetlite
+    StatusCode int //HTTP Response Status code
+}
+```
+
+```
 type Echonet_instance struct{
     read_recv_contract chan Contract_context
     read_recv_data chan Data_context
 }
 type Contract_context struct{
     get_contract_request Get_contract_request
-    return_channel chan echonetlite.Echonetlite
+    return_channel chan ReturnChannel
 }
 type Data_context struct{
     post_data_request Post_data_request
