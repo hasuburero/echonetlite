@@ -4,16 +4,16 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/hasuburero/echonetlite/echonetlite"
 	"io"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
 )
 
 var Sig chan os.Signal
+var Error = make(chan error, 1)
 
 // data structure witch through the api channel
 type Contract_context struct {
@@ -108,8 +108,6 @@ func (self *Echonet_instance) Data(w http.ResponseWriter, r *http.Request) {
 }
 
 func Init(addr, port, contract, data string) Echonet_instance {
-	Sig = make(chan os.Signal)
-	signal.Notify(Sig, syscall.SIGTERM)
 	var echonet_instance Echonet_instance = Echonet_instance{make(chan Contract_context), make(chan Data_context)}
 	server := http.Server{
 		Addr: addr + ":" + port,
@@ -123,7 +121,7 @@ func Init(addr, port, contract, data string) Echonet_instance {
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("http.Server.ListenAndServe error")
-			os.Exit(1)
+			Error <- errors.NewError("echonetlite server starting error")
 		}
 	}()
 
