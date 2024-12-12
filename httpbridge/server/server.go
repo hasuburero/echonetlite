@@ -9,10 +9,8 @@ import (
 	"github.com/hasuburero/echonetlite/echonetlite"
 	"io"
 	"net/http"
-	"os"
 )
 
-var Sig chan os.Signal
 var Error = make(chan error, 1)
 
 // data structure witch through the api channel
@@ -121,7 +119,7 @@ func Init(addr, port, contract, data string) Echonet_instance {
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("http.Server.ListenAndServe error")
-			Error <- errors.NewError("echonetlite server starting error")
+			Error <- errors.New("echonetlite server starting error")
 		}
 	}()
 
