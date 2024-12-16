@@ -5,6 +5,7 @@ import (
 	"github.com/hasuburero/echonetlite/echonetlite"
 	"github.com/hasuburero/echonetlite/echonetlite/class/bat"
 	"github.com/hasuburero/echonetlite/httpbridge/server"
+	"http"
 	"os"
 	"strconv"
 )
@@ -58,6 +59,11 @@ func main() {
 			fmt.Println("receive contract")
 			// here is good place to verify gw_id
 			gw_id := contract_data.Get_contract_request.Gw_id
+			_, exists := GW[gw_id]
+			if !exists {
+				contract_data.Return_channel <- server.ReturnChannel{StatusCode: http.StatusNotAcceptable}
+				continue
+			}
 			var instance echonetlite.Echonetlite
 			instance = echonetlite.Echonetlite{EHD1: EHD1, EHD2: EHD2, Tid: GW[gw_id].Tid,
 				SEOJ: Class_VGW, DEOJ: echonetlite.Class_Battery, ESV: echonetlite.ESV_Get,

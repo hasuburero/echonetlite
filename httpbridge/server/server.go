@@ -38,7 +38,7 @@ type Get_contract_response struct {
 }
 
 type ReturnChannel struct {
-	Echonet_instance echonetlite.Echonetlite
+	Echonet_instance chan echonetlite.Echonetlite
 	StatusCode       int
 }
 
@@ -66,7 +66,8 @@ func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
 	return_ctx := <-recv_context.Return_channel
 
 	if return_ctx.StatusCode == http.StatusOK {
-		frame := Get_contract_response{Frame: base64.StdEncoding.EncodeToString(return_ctx.Echonet_instance.Frame[:return_ctx.Echonet_instance.Frame_size])}
+		echonet_instance := <-return_ctx.Echonet_instance
+		frame := Get_contract_response{Frame: base64.StdEncoding.EncodeToString(echonet_instance.Frame[:echonet_instance.Frame_size])}
 
 		json_buf, err := json.Marshal(frame)
 		if err != nil {
