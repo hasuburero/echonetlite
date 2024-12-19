@@ -9,6 +9,7 @@ import (
 	"github.com/hasuburero/echonetlite/echonetlite"
 	"io"
 	"net/http"
+	"time"
 )
 
 var Error = make(chan error, 1)
@@ -16,11 +17,13 @@ var Error = make(chan error, 1)
 // data structure witch through the api channel
 type Contract_context struct {
 	Get_contract_request Get_contract_request
+	Timestamp            time.Time
 	Return_channel       chan ReturnChannel
 }
 
 type Data_context struct {
 	Post_data_request Post_data_request
+	Timestamp         time.Time
 }
 
 // http request body structure
@@ -48,6 +51,7 @@ type Echonet_instance struct {
 }
 
 func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
+	// current_time := time.Now()
 	length := r.ContentLength
 	reqBody := make([]byte, length)
 	r.Body.Read(reqBody)
@@ -87,6 +91,7 @@ func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
 }
 
 func (self *Echonet_instance) Data(w http.ResponseWriter, r *http.Request) {
+	// current_time := time.Now()
 	length := r.ContentLength
 	reqBody := make([]byte, length)
 	r.Body.Read(reqBody)
