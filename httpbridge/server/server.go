@@ -15,10 +15,20 @@ import (
 var Error = make(chan error, 1)
 
 // data structure witch through the api channel
+type Bridge_instance struct {
+	Read_recv_contract chan Contract_context
+	Read_recv_data     chan Data_context
+}
+
 type Contract_context struct {
 	Get_contract_request Get_contract_request
 	Timestamp            time.Time
 	Return_channel       chan ReturnChannel
+}
+
+type ReturnChannel struct {
+	Echonet_instance chan echonetlite.Echonetlite
+	StatusCode       int
 }
 
 type Data_context struct {
@@ -40,18 +50,7 @@ type Get_contract_response struct {
 	Frame string `json:"frame"`
 }
 
-type ReturnChannel struct {
-	Echonet_instance chan echonetlite.Echonetlite
-	StatusCode       int
-}
-
-type Echonet_instance struct {
-	Read_recv_contract chan Contract_context
-	Read_recv_data     chan Data_context
-}
-
-func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
-	// current_time := time.Now()
+func (self *Bridge_instance) Contract(w http.ResponseWriter, r *http.Request) {
 	length := r.ContentLength
 	reqBody := make([]byte, length)
 	r.Body.Read(reqBody)
@@ -90,8 +89,8 @@ func (self *Echonet_instance) Contract(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (self *Echonet_instance) Data(w http.ResponseWriter, r *http.Request) {
-	// current_time := time.Now()
+func (self *Bridge_instance) Data(w http.ResponseWriter, r *http.Request) {
+	current_time := time.Now()
 	length := r.ContentLength
 	reqBody := make([]byte, length)
 	r.Body.Read(reqBody)
@@ -104,21 +103,21 @@ func (self *Echonet_instance) Data(w http.ResponseWriter, r *http.Request) {
 	}
 	byte_buf, err := base64.RawStdEncoding.DecodeString(ctx.Frame)
 	ctx.Frame = string(byte_buf)
-	var recv_context Data_context = Data_context{ctx}
+	var recv_context Data_context = Data_context{Post_data_request: ctx, Timestamp: current_time}
 	self.Read_recv_data <- recv_context
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte("ok"))
 }
 
-func Init(addr, port, contract, data string) Echonet_instance {
-	var echonet_instance Echonet_instance = Echonet_instance{make(chan Contract_context), make(chan Data_context)}
+func Init(addr, port, contract, data string) Bridge_instance {
+	var bridge_instance Bridge_instance = Bridge_instance{make(chan Contract_context), make(chan Data_context)}
 	server := http.Server{
 		Addr: addr + ":" + port,
 	}
 
-	http.HandleFunc(contract, echonet_instance.Contract)
-	http.HandleFunc(data, echonet_instance.Data)
+	http.HandleFunc(contract, bridge_instance.Contract)
+	http.HandleFunc(data, bridge_instance.Data)
 
 	go func() {
 		err := server.ListenAndServe()
@@ -129,5 +128,5 @@ func Init(addr, port, contract, data string) Echonet_instance {
 		}
 	}()
 
-	return echonet_instance
+	return bridge_instance
 }
