@@ -32,8 +32,8 @@ type ReturnChannel struct {
 }
 
 type Data_context struct {
-	Post_data_request Post_data_request
-	Timestamp         time.Time
+	Post_data Post_data_request
+	Timestamp time.Time
 }
 
 // http request body structure
@@ -103,7 +103,7 @@ func (self *Bridge_instance) Data(w http.ResponseWriter, r *http.Request) {
 	}
 	byte_buf, err := base64.RawStdEncoding.DecodeString(ctx.Frame)
 	ctx.Frame = string(byte_buf)
-	var recv_context Data_context = Data_context{Post_data_request: ctx, Timestamp: current_time}
+	var recv_context Data_context = Data_context{Post_data: ctx, Timestamp: current_time}
 	self.Read_recv_data <- recv_context
 
 	w.WriteHeader(http.StatusOK)
