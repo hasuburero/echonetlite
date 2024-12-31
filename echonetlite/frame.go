@@ -134,8 +134,6 @@ func ShowByteFrame(frame []byte) {
 	fmt.Println("")
 }
 
-func (self *Echonetlite) 
-
 func (self *Echonetlite) ReverseFrame() error {
 	if len(self.Frame) == 0 {
 		return errors.New("0 length frame")
@@ -248,8 +246,8 @@ func (self *Echonetlite) MakeFrame() error {
 
 func (self *Echonetlite) GetProperty() map[string]Datactx {
 	var datactx = make(map[byte]Datactx)
-	for _, ctx := range self.Datactx{
-		datactx[ctx.EPC] = Datactx{EPC:ctx.EPC, PDC:ctx.PDC, EDT:ctx.EDT}
+	for _, ctx := range self.Datactx {
+		datactx[ctx.EPC] = Datactx{EPC: ctx.EPC, PDC: ctx.PDC, EDT: ctx.EDT}
 	}
 	return datactx
 }
@@ -279,4 +277,3 @@ func MakeInstance(frame []byte) Echonetlite {
 	echonetlite_instance.Frame_size = index
 	return echonetlite_instance
 }
-
