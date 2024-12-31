@@ -181,6 +181,9 @@ func (self *Echonetlite) ReverseFrame() error {
 	return nil
 }
 
+/*
+making echonetlite frame from echonetlite.Echonetlite fields
+*/
 func (self *Echonetlite) MakeFrame() error {
 	if int(self.OPC) != len(self.Datactx) {
 		return errors.New("opc not matches for datactx length")
@@ -244,7 +247,11 @@ func (self *Echonetlite) MakeFrame() error {
 	return nil
 }
 
-func (self *Echonetlite) GetProperty() map[string]Datactx {
+/*
+input: echonetlite.Echonetlite
+output: map[byte(EPC)]Datactx
+*/
+func (self *Echonetlite) GetProperty() map[byte]Datactx {
 	var datactx = make(map[byte]Datactx)
 	for _, ctx := range self.Datactx {
 		datactx[ctx.EPC] = Datactx{EPC: ctx.EPC, PDC: ctx.PDC, EDT: ctx.EDT}
