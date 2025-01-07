@@ -102,14 +102,14 @@ var MaxCharge = class.Class{
 	Name:       "最大充電電力",
 	EPC:        0xc8,
 	Context:    "実際は最小:最大の2つを同時取得, 0-999,999,999W",
-	DataType:   "unsigned long",
+	DataType:   "unsigned long * 2",
 	Size:       8,
 	AccessRule: "Get"}
 var MaxDischarge = class.Class{
 	Name:       "最大放電電力",
 	EPC:        0xc9,
 	Context:    "実際は最小:最大の2つを同時取得, 0-999,999,999W",
-	DataType:   "unsigned long",
+	DataType:   "unsigned long * 2",
 	Size:       8,
 	AccessRule: "Get"}
 var Mode_current = class.Class{
