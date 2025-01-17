@@ -13,7 +13,7 @@ type Recv_Context struct {
 
 type Controller_Instance struct {
 	MulticastAddr string
-	MulticastPort string
+	MulticastPort int
 	UnicastAddr   string
 	UnicastPort   int
 	Conn          *net.UDPConn
@@ -22,13 +22,17 @@ type Controller_Instance struct {
 
 const (
 	DefaultMulticastAddr = "224.0.23.0"
-	DefaultMulticastPort = ":3610"
+	DefaultMulticastPort = 3610
 	DefaultUnicastAddr   = "localhost"
 	DefaultUnicastPort   = 3610
 )
 
 func (self *Controller_Instance) Send(frame []byte) error {
-	conn, err := net.Dial("udp", self.MulticastAddr+self.MulticastPort)
+	address := net.UDPAddr{
+		IP:   net.IP(self.MulticastAddr),
+		Port: self.MulticastPort,
+	}
+	conn, err := net.Dial("udp", address.String())
 	if err != nil {
 		return err
 	}
@@ -68,7 +72,7 @@ default addr: localhost
 default port: 3610
 */
 func Start(multicastAddr, unicastAddr string, multicastPort, unicastPort int) (Controller_Instance, error) {
-	var controller = Controller_Instance{MulticastAddr: multicastAddr, MulticastPort: ":" + strconv.Itoa(multicastPort), Recv_Channel: make(chan Recv_Context)}
+	var controller = Controller_Instance{MulticastAddr: multicastAddr, MulticastPort: multicastPort, Recv_Channel: make(chan Recv_Context)}
 	address := net.UDPAddr{
 		IP:   net.ParseIP(unicastAddr),
 		Port: unicastPort,
