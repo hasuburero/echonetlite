@@ -124,7 +124,7 @@ var Size = class.Class{
 	EPC:        0xd0,
 	Context:    "0-999,999,999Wh",
 	DataType:   "unsigned long",
-	Size:       2,
+	Size:       4,
 	AccessRule: "Get"}
 var GenPower = class.Class{
 	Name:       "瞬時電力",
