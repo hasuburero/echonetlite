@@ -259,6 +259,17 @@ func (self *Echonetlite) GetProperty() map[byte]Datactx {
 	return datactx
 }
 
+func (self *Echonetlite) GetPropertyIgnoreZero() map[byte]Datactx {
+	var datactx = make(map[byte]Datactx)
+	for _, ctx := range self.Datactx {
+		if ctx.PDC == 0x00 {
+			continue
+		}
+		datactx[ctx.EPC] = Datactx{EPC: ctx.EPC, PDC: ctx.PDC, EDT: ctx.EDT}
+	}
+	return datactx
+}
+
 func MakeInstance(frame []byte) Echonetlite {
 	var echonetlite_instance Echonetlite
 	echonetlite_instance = Echonetlite{EHD1: frame[0], EHD2: frame[1], Tid: [2]byte(frame[2:4]), SEOJ: [3]byte(frame[4:7]), DEOJ: [3]byte(frame[7:10]), ESV: frame[10], OPC: frame[11]}
