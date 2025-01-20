@@ -20,12 +20,12 @@ type Get_contract_request struct {
 }
 
 type Get_contract_response struct {
-	Frame string `json:"frame"`
+	Frame []byte `json:"frame"`
 }
 
 type Post_data_request struct {
 	Gw_id string `json:"gw_id"`
-	Frame string `json:"frame"`
+	Frame []byte `json:"frame"`
 }
 
 type GW_instance struct {
@@ -39,9 +39,9 @@ type GW_instance struct {
 
 var wait chan bool
 
-func (self *GW_instance) Data(frame string) error {
-	frame = base64.StdEncoding.EncodeToString([]byte(frame))
-	request := Post_data_request{Gw_id: self.Gw_id, Frame: frame}
+func (self *GW_instance) Data(frame []byte) error {
+	str := base64.StdEncoding.EncodeToString(frame)
+	request := Post_data_request{Gw_id: self.Gw_id, Frame: []byte(str)}
 	json_buf, err := json.Marshal(request)
 	if err != nil {
 		fmt.Println(err)
@@ -72,19 +72,19 @@ func (self *GW_instance) Data(frame string) error {
 	return nil
 }
 
-func (self *GW_instance) Contract() (string, error) {
+func (self *GW_instance) Contract() ([]byte, error) {
 	request := Get_contract_request{Gw_id: self.Gw_id}
 	json_buf, err := json.Marshal(request)
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return nil, err
 	}
 	// debug
 	buf := bytes.NewBuffer(json_buf)
 	req, err := http.NewRequest(Get_method, self.Scheme+self.Addr+self.Port+self.Contract_path, buf)
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return nil, err
 	}
 
 	req.Header.Add("content-type", "application/json")
@@ -92,26 +92,25 @@ func (self *GW_instance) Contract() (string, error) {
 	res, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return nil, err
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return nil, err
 	}
 
 	var ctx Get_contract_response
 	err = json.Unmarshal(body, &ctx)
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return nil, err
 	}
-	byte_buf, err := base64.StdEncoding.DecodeString(ctx.Frame)
-	ctx.Frame = string(byte_buf)
+	byte_buf, err := base64.StdEncoding.DecodeString(string(ctx.Frame))
 
-	return ctx.Frame, nil
+	return byte_buf, nil
 }
 
 func Init(Gw_id, Scheme, Addr, Port, Contract_path, Data_path string) GW_instance {
