@@ -119,6 +119,13 @@ var Mode_current = class.Class{
 	DataType:   "unsigned char",
 	Size:       1,
 	AccessRule: "Get"}
+var Size = class.Class{
+	Name:       "DC定格電力量",
+	EPC:        0xd0,
+	Context:    "0-999,999,999Wh",
+	DataType:   "unsigned long",
+	Size:       2,
+	AccessRule: "Get"}
 var GenPower = class.Class{
 	Name:       "瞬時電力",
 	EPC:        0xd3,
