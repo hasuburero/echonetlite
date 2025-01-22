@@ -5,7 +5,7 @@ import (
 	"github.com/hasuburero/echonetlite/echonetlite"
 	"github.com/hasuburero/echonetlite/echonetlite/class/bat"
 	"github.com/hasuburero/echonetlite/httpbridge/server"
-	"http"
+	"net/http"
 	"os"
 	"strconv"
 )
