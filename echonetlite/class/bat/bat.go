@@ -16,6 +16,8 @@ const (
 	EPC_Product    = 0x8c // 12byte, product code
 )
 
+var ObjectCode = [3]byte{ClassGroupCode, ClassCode, 0x00}
+
 var Status = class.Class{
 	Name:       "動作状態",
 	EPC:        0x80,
