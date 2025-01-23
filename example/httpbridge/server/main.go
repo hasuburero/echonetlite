@@ -21,7 +21,7 @@ var (
 )
 
 const (
-	addr               = ""
+	addr               = "localhost"
 	port               = "8080"
 	contract_path      = "/contract"
 	data_path          = "/data"
@@ -51,14 +51,14 @@ func main() {
 		GW[gw_id] = GW_struct{Gw_id: gw_id, Tid: [2]byte{0, 0}}
 	}
 
-	Bridge_instance := server.Init(addr, port, contract_path, data_path)
+	Bridge_instance := server.Start(addr, port, contract_path, data_path)
 	fmt.Println("echonetlite bridge server started")
 	for {
 		select {
 		case contract_data := <-Bridge_instance.Read_recv_contract:
 			fmt.Println("receive contract")
 			// here is good place to verify gw_id
-			gw_id := contract_data.Get_contract_request.Gw_id
+			gw_id := contract_data.Gw_id
 			_, exists := GW[gw_id]
 			if !exists {
 				contract_data.Return_channel <- server.ReturnChannel{StatusCode: http.StatusNotAcceptable}
@@ -80,16 +80,19 @@ func main() {
 			}
 
 			fmt.Println("")
+
+			var echonet_chan = make(chan echonetlite.Echonetlite)
 			instance.ShowInstanceFrame()
-			contract_data.Return_channel <- server.ReturnChannel{Echonet_instance: instance, StatusCode: StatusOK}
+			contract_data.Return_channel <- server.ReturnChannel{Echonet_instance: echonet_chan, StatusCode: StatusOK}
+			echonet_chan <- instance
 		case data_data := <-Bridge_instance.Read_recv_data:
 			fmt.Println("receive data")
-			//gw_id := data_data.Post_data_request.Gw_id
-			frame := data_data.Post_data_request.Frame
+			gw_id := data_data.Gw_id
+			frame := data_data.Frame
 
 			echonet_instance := echonetlite.MakeInstance([]byte(frame))
 			echonetlite.ShowByteFrame([]byte(frame))
-			fmt.Print("data:")
+			fmt.Printf("Gw:%s, data:%v", gw_id, []byte(frame))
 			echonet_instance.ShowInstanceFrame()
 		}
 	}

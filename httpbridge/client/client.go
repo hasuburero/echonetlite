@@ -20,12 +20,12 @@ type Get_contract_request struct {
 }
 
 type Get_contract_response struct {
-	Frame []byte `json:"frame"`
+	Frame string `json:"frame"`
 }
 
 type Post_data_request struct {
 	Gw_id string `json:"gw_id"`
-	Frame []byte `json:"frame"`
+	Frame string `json:"frame"`
 }
 
 type GW_instance struct {
@@ -41,7 +41,7 @@ var wait chan bool
 
 func (self *GW_instance) Data(frame []byte) error {
 	str := base64.StdEncoding.EncodeToString(frame)
-	request := Post_data_request{Gw_id: self.Gw_id, Frame: []byte(str)}
+	request := Post_data_request{Gw_id: self.Gw_id, Frame: str}
 	json_buf, err := json.Marshal(request)
 	if err != nil {
 		fmt.Println(err)
@@ -108,7 +108,11 @@ func (self *GW_instance) Contract() ([]byte, error) {
 		fmt.Println(err)
 		return nil, err
 	}
-	byte_buf, err := base64.StdEncoding.DecodeString(string(ctx.Frame))
+	byte_buf, err := base64.StdEncoding.DecodeString((ctx.Frame))
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
 
 	return byte_buf, nil
 }

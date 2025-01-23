@@ -21,10 +21,10 @@ const (
 
 var wait chan bool
 
-func recvFrame(frame string) (string, error) {
+func recvFrame(frame []byte) ([]byte, error) {
 	fmt.Println("--- debug ---")
-	echonetlite.ShowByteFrame([]byte(frame))
-	echonet_instance := echonetlite.MakeInstance([]byte(frame))
+	echonetlite.ShowByteFrame(frame)
+	echonet_instance := echonetlite.MakeInstance(frame)
 	fmt.Println("--- debug ---")
 	echonet_instance.ShowInstanceFrame()
 	var buf [3]byte
@@ -56,12 +56,14 @@ func recvFrame(frame string) (string, error) {
 	// debug
 	err := echonet_instance.MakeFrame()
 	echonet_instance.ShowInstanceFrame()
-	return string(echonet_instance.Frame), err
+	return echonet_instance.Frame, err
 }
 
-func control(frame string) string { // dammy function
+func control(frame []byte) []byte { // dammy function
 	fmt.Print("> ")
-	echonetlite.ShowByteFrame([]byte(frame))
+	fmt.Println(frame)
+	fmt.Print("> ")
+	echonetlite.ShowByteFrame(frame)
 
 	frame, err := recvFrame(frame)
 	if err != nil {
