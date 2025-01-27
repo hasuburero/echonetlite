@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var Error = make(chan error)
+var Error = make(chan error, 1)
 
 // data structure witch through the api channel
 type Bridge_instance struct {
