@@ -1,7 +1,9 @@
 package device
 
 import (
+	"fmt"
 	"net"
+	"strconv"
 )
 
 type Recv_Context struct {
@@ -69,29 +71,34 @@ default port: 3610
 */
 func Start(multicastaddr string, multicastport, unicastport int) (Device_Instance, error) {
 	var device = Device_Instance{MulticastAddr: multicastaddr, MulticastPort: multicastport, UnicastPort: unicastport, Recv_Channel: make(chan Recv_Context, 10)}
-	address := net.UDPAddr{
-		IP:   net.IP(multicastaddr),
-		Port: multicastport,
-	}
-	conn, err := net.ListenMulticastUDP("udp", nil, &address)
+
+	address := multicastaddr + ":" + strconv.Itoa(multicastport)
+	addr, err := net.ResolveUDPAddr("udp", address)
 	if err != nil {
-		address = net.UDPAddr{
-			IP:   net.IP(DefaultMulticastAddr),
-			Port: DefaultMulticastPort,
-		}
-		conn, err = net.ListenMulticastUDP("udp", nil, &address)
+		fmt.Println(err)
+		fmt.Println("net.ResolveUDPAddr error")
+		fmt.Println("using default settings")
+		address = DefaultMulticastAddr + ":" + strconv.Itoa(DefaultMulticastPort)
+		addr, err = net.ResolveUDPAddr("udp", address)
 		if err != nil {
+			fmt.Println("net.ListenMulticastUDP error")
 			return Device_Instance{}, err
 		} else {
 			device.MulticastAddr = DefaultMulticastAddr
 			device.MulticastPort = DefaultMulticastPort
 		}
-		device.Conn = conn
-
-		go func(device Device_Instance) {
-			device.recvThread()
-		}(device)
 	}
+
+	conn, err := net.ListenMulticastUDP("udp", nil, addr)
+	if err != nil {
+		fmt.Println("net.ListenMulticastUDP error")
+		return Device_Instance{}, err
+	}
+	device.Conn = conn
+
+	go func(device Device_Instance) {
+		device.recvThread()
+	}(device)
 
 	return device, nil
 }
