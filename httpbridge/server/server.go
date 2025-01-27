@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+var Error = make(chan error)
+
 // data structure witch through the api channel
 type Bridge_instance struct {
 	Read_recv_contract chan Contract_context
@@ -123,6 +125,7 @@ func Start(addr, port, contract, data string) Bridge_instance {
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("http.Server.ListenAndServe error")
+			Error <- err
 		}
 	}()
 
