@@ -122,6 +122,7 @@ func Start(addr, port, contract, data string) Bridge_instance {
 	http.HandleFunc(data, bridge_instance.Data)
 
 	go func() {
+		fmt.Println("---------- Echonetlite Bridge starting ----------")
 		err := server.ListenAndServe()
 		if err != nil {
 			fmt.Println(err)
