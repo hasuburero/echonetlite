@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/hasuburero/echonetlite/echonetlite"
-	"github.com/hasuburero/util/panic"
 	"io"
 	"net/http"
 	"time"
@@ -125,7 +123,6 @@ func Start(addr, port, contract, data string) Bridge_instance {
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("http.Server.ListenAndServe error")
-			panic.Error <- errors.New("echonetlite server starting error")
 		}
 	}()
 
