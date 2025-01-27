@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	//"github.com/hasuburero/echonetlite/echonetlite"
 	"io"
@@ -63,6 +64,10 @@ func (self *GW_instance) Data(frame []byte) error {
 	}
 	defer res.Body.Close()
 
+	if res.StatusCode != http.StatusOK {
+		return errors.New("bad request")
+	}
+
 	_, err = io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
@@ -95,6 +100,10 @@ func (self *GW_instance) Contract() ([]byte, error) {
 		return nil, err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New("bad request")
+	}
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
