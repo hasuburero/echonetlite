@@ -7,12 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hasuburero/echonetlite/echonetlite"
+	"github.com/hasuburero/util/panic"
 	"io"
 	"net/http"
 	"time"
 )
-
-var Error = make(chan error, 1)
 
 // data structure witch through the api channel
 type Bridge_instance struct {
@@ -122,12 +121,11 @@ func Start(addr, port, contract, data string) Bridge_instance {
 	http.HandleFunc(data, bridge_instance.Data)
 
 	go func() {
-		fmt.Println("---------- Echonetlite Bridge starting ----------")
 		err := server.ListenAndServe()
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("http.Server.ListenAndServe error")
-			Error <- errors.New("echonetlite server starting error")
+			panic.Error <- errors.New("echonetlite server starting error")
 		}
 	}()
 
