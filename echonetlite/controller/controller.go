@@ -2,7 +2,9 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net"
+	"strconv"
 )
 
 type Recv_Context struct {
@@ -23,15 +25,13 @@ const (
 	DefaultMulticastAddr = "224.0.23.0"
 	DefaultMulticastPort = 3610
 	DefaultUnicastAddr   = "localhost"
-	DefaultUnicastPort   = 3610
+	DefaultUnicastPort   = 3611
 )
 
 func (self *Controller_Instance) Send(frame []byte) error {
-	address := net.UDPAddr{
-		IP:   net.IP(self.MulticastAddr),
-		Port: self.MulticastPort,
-	}
-	conn, err := net.Dial("udp", address.String())
+	address := self.MulticastAddr + ":" + strconv.Itoa(self.MulticastPort)
+	fmt.Println("sending to ", address)
+	conn, err := net.Dial("udp", address)
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ Setting controller unicastAddr and unicastPort
 default addr: localhost
 default port: 3610
 */
-func Start(multicastAddr, unicastAddr string, multicastPort, unicastPort int) (Controller_Instance, error) {
+func Start(multicastAddr string, multicastPort int, unicastAddr string, unicastPort int) (Controller_Instance, error) {
 	var controller = Controller_Instance{MulticastAddr: multicastAddr, MulticastPort: multicastPort, Recv_Channel: make(chan Recv_Context)}
 	address := net.UDPAddr{
 		IP:   net.ParseIP(unicastAddr),
@@ -90,8 +90,8 @@ func Start(multicastAddr, unicastAddr string, multicastPort, unicastPort int) (C
 			controller.UnicastPort = DefaultUnicastPort
 		}
 	} else {
-		controller.UnicastAddr = DefaultUnicastAddr
-		controller.UnicastPort = DefaultUnicastPort
+		controller.UnicastAddr = unicastAddr
+		controller.UnicastPort = unicastPort
 	}
 	controller.Conn = conn_server
 

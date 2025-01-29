@@ -23,15 +23,12 @@ type Device_Instance struct {
 const (
 	DefaultMulticastAddr = "224.0.23.0"
 	DefaultMulticastPort = 3610
-	DefaultUnicastPort   = 3610
+	DefaultUnicastPort   = 3611
 )
 
-func (self *Device_Instance) Send(frame []byte, dst net.IP) error {
-	address := net.UDPAddr{
-		IP:   dst,
-		Port: self.UnicastPort,
-	}
-	conn, err := net.Dial("udp", address.String())
+func (self *Device_Instance) Send(frame []byte, dstaddr string) error {
+	address := dstaddr + ":" + strconv.Itoa(self.UnicastPort)
+	conn, err := net.Dial("udp", address)
 	if err != nil {
 		return err
 	}
@@ -45,9 +42,9 @@ func (self *Device_Instance) Send(frame []byte, dst net.IP) error {
 	return nil
 }
 
-func (self *Device_Instance) Read() (net.IP, []byte, error) {
+func (self *Device_Instance) Read() (string, []byte, error) {
 	recv_context := <-self.Recv_Channel
-	return recv_context.IP, recv_context.Frame, recv_context.Err
+	return recv_context.IP.String(), recv_context.Frame, recv_context.Err
 }
 
 func (self *Device_Instance) recvThread() {
@@ -95,6 +92,8 @@ func Start(multicastaddr string, multicastport, unicastport int) (Device_Instanc
 		return Device_Instance{}, err
 	}
 	device.Conn = conn
+
+	fmt.Println("listening from ", device.MulticastAddr+":"+strconv.Itoa(device.MulticastPort))
 
 	go func(device Device_Instance) {
 		device.recvThread()
