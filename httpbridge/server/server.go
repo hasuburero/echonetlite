@@ -71,18 +71,25 @@ func (self *Bridge_instance) Contract(w http.ResponseWriter, r *http.Request) {
 
 	if return_ctx.StatusCode == http.StatusOK {
 		echonet_instance := <-return_ctx.Echonet_instance
+		err = echonet_instance.MakeFrame()
+		if err != nil {
+			w.WriteHeader(http.StatusBadGateway)
+			return
+		}
 		frame := Get_contract_response{Frame: base64.StdEncoding.EncodeToString(echonet_instance.Frame[:echonet_instance.Frame_size])}
 
 		json_buf, err := json.Marshal(frame)
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("json.Marshal error")
+			w.WriteHeader(http.StatusBadGateway)
 			return
 		}
 		body := bytes.NewBuffer(json_buf)
 		_, err = io.Copy(w, body)
 		if err != nil {
 			fmt.Println("io.Copy error")
+			w.WriteHeader(http.StatusBadGateway)
 			return
 		}
 	} else {

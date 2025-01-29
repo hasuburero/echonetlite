@@ -270,8 +270,11 @@ func (self *Echonetlite) GetPropertyIgnoreZero() map[byte]Datactx {
 	return datactx
 }
 
-func MakeInstance(frame []byte) Echonetlite {
+func MakeInstance(frame []byte) (Echonetlite, error) {
 	var echonetlite_instance Echonetlite
+	if len(frame) < 12 {
+		return Echonetlite{}, errors.New("invalid frame length")
+	}
 	echonetlite_instance = Echonetlite{EHD1: frame[0], EHD2: frame[1], Tid: [2]byte(frame[2:4]), SEOJ: [3]byte(frame[4:7]), DEOJ: [3]byte(frame[7:10]), ESV: frame[10], OPC: frame[11]}
 	index := 12
 	for index < len(frame) {
@@ -293,5 +296,5 @@ func MakeInstance(frame []byte) Echonetlite {
 		echonetlite_instance.Datactx = append(echonetlite_instance.Datactx, datactx)
 	}
 	echonetlite_instance.Frame_size = index
-	return echonetlite_instance
+	return echonetlite_instance, nil
 }
