@@ -30,12 +30,14 @@ type Post_data_request struct {
 }
 
 type GW_instance struct {
-	Gw_id         string
-	Scheme        string
-	Addr          string
-	Port          string
-	Contract_path string
-	Data_path     string
+	Gw_id           string
+	Scheme          string
+	Addr            string
+	Port            string
+	Contract_path   string
+	Data_path       string
+	Data_client     *http.Client
+	Contract_client *http.Client
 }
 
 var wait chan bool
@@ -56,8 +58,7 @@ func (self *GW_instance) Data(frame []byte) error {
 	}
 
 	req.Header.Add("content-type", "application/json")
-	client := &http.Client{}
-	res, err := client.Do(req)
+	res, err := self.Data_client.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -93,8 +94,7 @@ func (self *GW_instance) Contract() ([]byte, error) {
 	}
 
 	req.Header.Add("content-type", "application/json")
-	client := &http.Client{}
-	res, err := client.Do(req)
+	res, err := self.Contract_client.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -128,7 +128,9 @@ func (self *GW_instance) Contract() ([]byte, error) {
 
 func Init(Gw_id, Scheme, Addr, Port, Contract_path, Data_path string) GW_instance {
 	gw := GW_instance{Gw_id: Gw_id, Scheme: Scheme, Addr: Addr, Port: Port,
-		Contract_path: Contract_path,
-		Data_path:     Data_path}
+		Contract_path:   Contract_path,
+		Data_path:       Data_path,
+		Contract_client: &http.Client{},
+		Data_client:     &http.Client{}}
 	return gw
 }
