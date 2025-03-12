@@ -241,9 +241,7 @@ func (self *Echonetlite) MakeFrame() error {
 
 	self.Frame = frame
 	self.Frame_size = len(frame)
-	fmt.Println(self.Frame_size)
 	self.Frame_size = size
-	fmt.Println(self.Frame_size)
 	return nil
 }
 
