@@ -128,9 +128,17 @@ func (self *GW_instance) Contract() ([]byte, error) {
 
 func Init(Gw_id, Scheme, Addr, Port, Contract_path, Data_path string) GW_instance {
 	gw := GW_instance{Gw_id: Gw_id, Scheme: Scheme, Addr: Addr, Port: Port,
-		Contract_path:   Contract_path,
-		Data_path:       Data_path,
-		Contract_client: &http.Client{},
-		Data_client:     &http.Client{}}
+		Contract_path: Contract_path,
+		Data_path:     Data_path,
+		Contract_client: &http.Client{
+			Transport: &http.Transport{
+				DisableKeepAlives: false,
+			},
+		},
+		Data_client: &http.Client{
+			Transport: &http.Transport{
+				DisableKeepAlives: false,
+			},
+		}}
 	return gw
 }
